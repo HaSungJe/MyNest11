@@ -145,10 +145,10 @@ export class UserService {
             return { statusCode: HttpStatus.OK };
         } catch (error) {
             await conn.rollbackTransaction();
-            if (error.errno === 1062 && error.sqlMessage.indexOf('t_user.Unique_User_nickname') !== -1) {
+            if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
                 const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
                 return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError };
-            } else if (error.errno === 1062 && error.sqlMessage.indexOf('t_user.Unique_User_loginId') !== -1) {
+            } else if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_loginId') !== -1) {
                 const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
                 return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError };
             } else {
