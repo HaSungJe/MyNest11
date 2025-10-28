@@ -86,7 +86,7 @@ export class UserLoginSuccessResultDto {
 
 export class UserLoginFailResultDto {
     @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: 401 | 500;
+    statusCode: 401 | 403 | 500;
 
     @ApiProperty({description: '실패 메세지', required: false})
     message: string;
