@@ -4,7 +4,7 @@ import { CustomErrorFilter } from './exception/exception';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { ValidationErrorDto, ValidationErrorResultDto } from './exception/validation.error.dto';
+import { ApiFailResultDto, ValidationErrorDto } from './result.dto';
 import dayjs from 'dayjs';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
@@ -116,7 +116,9 @@ async function bootstrap() {
             transform: true,
             forbidNonWhitelisted: true,
             exceptionFactory: (errors) => {
-                const result = new ValidationErrorResultDto();
+                const result = new ApiFailResultDto();
+                result.validationError = [];
+
                 for (let i=0; i<errors.length; i++) {
                     const error = errors[i];
                     const errorDto = new ValidationErrorDto();

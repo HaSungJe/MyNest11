@@ -13,14 +13,20 @@ export class ValidationErrorDto {
     message: string;
 }
 
-// Class-Validation Reject Error
-export class ValidationErrorResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: HttpStatus.BAD_REQUEST;
+// 반환정보 성공
+export class ApiSuccessResultDto {
+    @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.OK})
+    statusCode: HttpStatus.OK;
+}
+
+// 반환정보 실패
+export class ApiFailResultDto {
+    @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.BAD_REQUEST})
+    statusCode: HttpStatus.BAD_REQUEST | HttpStatus.UNAUTHORIZED | HttpStatus.FORBIDDEN | HttpStatus.INTERNAL_SERVER_ERROR;
 
     @ApiProperty({description: '메세지', required: true})
     message: string;
 
     @ApiProperty({description: '에러 목록', isArray: true, type: () => ValidationErrorDto})
-    validationError: Array<ValidationErrorDto> = [];
+    validationError?: Array<ValidationErrorDto>;
 }

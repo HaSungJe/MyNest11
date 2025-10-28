@@ -1,9 +1,10 @@
 import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
+import { ApiSuccessResultDto } from "@root/result.dto";
 import { IsNotEmpty } from "class-validator";
 
 // 로그인
-export class UserLoginDto {
+export class LoginDto {
 @ApiProperty({description: '아이디', required: true})
     @IsNotEmpty({message: '아이디를 입력해주세요.'})
     login_id: string;
@@ -68,10 +69,7 @@ export class UserLoginDto {
 }
 
 // 로그인 성공 반환
-export class UserLoginSuccessResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: HttpStatus.OK;
-
+export class LoginSuccessResultDto extends ApiSuccessResultDto{
     @ApiProperty({description: '로그인 RefreshToken', required: true})
     refresh_token: string;
 
@@ -83,13 +81,4 @@ export class UserLoginSuccessResultDto {
 
     @ApiProperty({description: 'AccessToken 만료기간', required: true})
     access_token_end_dt: Date;
-}
-
-// 로그인 실패 반환
-export class UserLoginFailResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: HttpStatus.UNAUTHORIZED | HttpStatus.FORBIDDEN | HttpStatus.INTERNAL_SERVER_ERROR;
-
-    @ApiProperty({description: '실패 메세지', required: false})
-    message: string;
 }

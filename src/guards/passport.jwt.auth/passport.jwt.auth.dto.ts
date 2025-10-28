@@ -30,9 +30,6 @@ export class PassportUserSuccessResultDto {
     @ApiProperty({description: 'http 상태코드', required: true})
     statusCode: HttpStatus.OK;
 
-    @ApiProperty({description: '실패 메세지', required: false})
-    message: string;
-
     @ApiProperty(({description: '회원 정보', required: true, type: PassportUserResultDto}))
     info: PassportUserResultDto;
 }

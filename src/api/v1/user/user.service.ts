@@ -1,12 +1,15 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { UserLoginDto, UserLoginFailResultDto, UserLoginSuccessResultDto } from './dto/user.login.dto';
+import { LoginDto, LoginSuccessResultDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserLogin } from '@root/entities/user/t_user_login.entity';
+import { SignDto } from './dto/sign.dto';
+import { User } from '@root/entities/user/t_user.entity';
+import { CheckLoginIdDto } from './dto/check.loginId.dto';
+import { CheckNicknameDto } from './dto/check.nickname.dto';
+import { ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
-import { UserSignDto, UserSignFailResultDto, UserSignSuccessResultDto } from './dto/user.sign.dto';
-import { User } from '@root/entities/user/t_user.entity';
 
 @Injectable()
 export class UserService {
@@ -21,8 +24,8 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async login(dto: UserLoginDto): Promise<UserLoginSuccessResultDto | UserLoginFailResultDto> {
-        type UserLoginData = {
+    async login(dto: LoginDto): Promise<LoginSuccessResultDto | ApiFailResultDto> {
+        type LoginData = {
             user_id: string;
             login_id: string;
             login_pw: string;
@@ -53,7 +56,7 @@ export class UserService {
         builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
         builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
         builder.where('u.login_id = :login_id', {login_id: dto.login_id});
-        const user: UserLoginData = await builder.getRawOne();
+        const user: LoginData = await builder.getRawOne();
         if (user) {
             const match = await util.matchBcrypt(dto.login_pw, user.login_pw);
             if (!match) {
@@ -126,7 +129,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async sign(dto: UserSignDto): Promise<UserSignSuccessResultDto | UserSignFailResultDto> {
+    async sign(dto: SignDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
         const conn = this.dataSource.createQueryRunner();
         await conn.startTransaction();
 
@@ -156,6 +159,52 @@ export class UserService {
             }
         } finally {
             await conn.release();
+        }
+    }
+
+    /**
+     * 아이디 중복 확인
+     * 
+     * @param dto 
+     * @returns 
+     */
+    async checkLoginId(dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+        try {
+            const builder = this.dataSource.createQueryBuilder();
+            builder.from(User, 'u');
+            builder.where('u.login_id = :login_id', {login_id: dto.login_id});
+            const count = await builder.getCount();
+            if (count === 0) {
+                return { statusCode: HttpStatus.OK };
+            } else {
+                const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
+                return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError };
+            }
+        } catch (error) {
+            return { statusCode: HttpStatus.BAD_REQUEST, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
+        }
+    }
+
+    /**
+     * 닉네임 중복 확인
+     * 
+     * @param dto 
+     * @returns 
+     */
+    async checkNickname(dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+        try {
+            const builder = this.dataSource.createQueryBuilder();
+            builder.from(User, 'u');
+            builder.where('u.nickname = :nickname', {nickname: dto.nickname});
+            const count = await builder.getCount(); 
+            if (count === 0) {
+                return { statusCode: HttpStatus.OK };
+            } else {
+                const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
+                return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError };
+            } 
+        } catch (error) {
+            return { statusCode: HttpStatus.BAD_REQUEST, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
         }
     }
 }

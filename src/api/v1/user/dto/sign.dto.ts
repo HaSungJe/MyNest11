@@ -1,10 +1,9 @@
 import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
-import { ValidationErrorDto } from "@root/exception/validation.error.dto";
 import { IsNotEmpty, Length, Matches } from "class-validator";
 
 // 회원가입
-export class UserSignDto {
+export class SignDto {
     @ApiProperty({description: '로그인 ID', required: true})
     @Matches(/^[a-zA-Z0-9]+$/, {message: '아이디는 영문 대소문자와 숫자만 사용 가능합니다.'})   
     @Length(4, 20, {message: '아이디는 4자 이상 20자 이하로 입력해주세요.'})
@@ -32,22 +31,4 @@ export class UserSignDto {
     @Length(2, 30, {message: '닉네임은 2자 이상 30자 이하로 입력해주세요.'})
     @IsNotEmpty({message: '닉네임을 입력해주세요.'})
     nickname: string;
-}
-
-// 로그인 성공 반환
-export class UserSignSuccessResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: HttpStatus.OK;
-}
-
-// 로그인 실패 반환
-export class UserSignFailResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: HttpStatus.BAD_REQUEST | HttpStatus.INTERNAL_SERVER_ERROR;
-
-    @ApiProperty({description: '실패 메세지', required: false})
-    message: string;
-
-    @ApiProperty({description: '에러 목록', isArray: true, type: () => ValidationErrorDto})
-    validationError?: Array<ValidationErrorDto> = [];
 }
