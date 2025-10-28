@@ -3,6 +3,7 @@ import { parseStringPromise } from 'xml2js';
 import nodemailer from 'nodemailer';
 import sharp from 'sharp';
 import * as bcrypt from 'bcrypt';
+import { HttpStatus } from '@nestjs/common';
 
 /**
  * 파일명 인코딩 체크
@@ -376,9 +377,9 @@ export function readExcel(conf: any, file: Express.Multer.File) {
             }
         }
 
-        return { statusCode: 200, result: result };
+        return { statusCode: HttpStatus.OK, result: result };
     } catch (err) {
-        return { statusCode: 400, message: '파일을 읽어오는데 실패하였습니다.' }
+        return { statusCode: HttpStatus.BAD_REQUEST, message: '파일을 읽어오는데 실패하였습니다.' }
     }
 }
 
@@ -424,9 +425,9 @@ export async function sendEmail(email: string, subject: string, text: string) {
             text: text,
         });
 
-        return { statusCode: 200 }
+        return { statusCode: HttpStatus.OK }
     } catch (err) {
-        return { statusCode: 400, message: '이메일 전송 실패' }
+        return { statusCode: HttpStatus.BAD_REQUEST, message: '이메일 전송 실패' }
     } finally {
         transporter.close();
     }

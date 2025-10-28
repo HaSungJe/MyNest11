@@ -1,3 +1,4 @@
+import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 
 // Class-Validation Error
@@ -15,7 +16,7 @@ export class ValidationErrorDto {
 // Class-Validation Reject Error
 export class ValidationErrorResultDto {
     @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: 400;
+    statusCode: HttpStatus.BAD_REQUEST;
 
     @ApiProperty({description: '메세지', required: true})
     message: string;

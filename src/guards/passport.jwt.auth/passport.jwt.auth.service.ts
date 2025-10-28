@@ -1,15 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { ApiProperty } from "@nestjs/swagger";
 import { DataSource } from "typeorm";
-
-// 로그인한 회원의 정보
-export class LoginUserVO {
-    @ApiProperty({description: '회원 ID', required: true})
-    user_id: string;
-
-    @ApiProperty({description: '로그인 ID', required: true})
-    login_id: string;
-}
+import { PassportUserResultDto } from "./passport.jwt.auth.dto";
 
 @Injectable()
 export class PassPortJwtAuthService {
@@ -23,18 +14,24 @@ export class PassPortJwtAuthService {
      * @param user_id 
      * @returns 
      */
-    async getLoginUser(user_id: string): Promise<LoginUserVO> {
+    async getLoginUser(user_id: string): Promise<PassportUserResultDto> {
         try {
             // 1. 회원 정보 조회
             const builder = this.dataSource.createQueryBuilder();
             builder.select(`
-                  u.user_id
-                , u.login_id
+                  u.user_id 
+                , u.login_id 
+                , u.name 
+                , u.nickname 
+                , a.auth_id 
+                , s.state_id 
+                , s.login_able_yn 
             `);
             builder.from('t_user', 'u');
             builder.where('u.user_id = :user_id', {user_id});
-            const result: LoginUserVO = await builder.getRawOne();
-
+            builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
+            builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
+            const result: PassportUserResultDto = await builder.getRawOne();
             if (result) {
                 return result;
             } else {

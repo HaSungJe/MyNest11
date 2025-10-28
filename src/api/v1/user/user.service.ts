@@ -109,7 +109,7 @@ export class UserService {
         try {
             await conn.manager.insert(UserLogin, login);
             await conn.commitTransaction();
-            return { statusCode: 200, refresh_token: refreshToken, access_token: accessToken, refresh_token_end_dt: refreshTokenEXP, access_token_end_dt: accessTokenEXP }
+            return { statusCode: HttpStatus.OK, refresh_token: refreshToken, access_token: accessToken, refresh_token_end_dt: refreshTokenEXP, access_token_end_dt: accessTokenEXP }
         } catch (error) {
             await conn.rollbackTransaction();
             return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
