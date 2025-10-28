@@ -28,9 +28,10 @@ export class PassPortJwtAuthService {
                 , s.login_able_yn 
             `);
             builder.from('t_user', 'u');
-            builder.where('u.user_id = :user_id', {user_id});
             builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
             builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
+            builder.where('u.user_id = :user_id', {user_id});
+            builder.andWhere('s.login_able_yn = :login_able_yn', {login_able_yn: 'Y'});
             const result: PassportUserResultDto = await builder.getRawOne();
             if (result) {
                 return result;
