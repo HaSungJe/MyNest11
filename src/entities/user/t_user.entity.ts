@@ -2,6 +2,9 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, Prim
 import { Auth } from "./t_auth.entity";
 import { State } from "./t_state.entity";
 
+/**
+ * 회원 정보 Entity
+ */
 @Entity({name: 't_user', comment: '회원 정보'})
 @Unique('Unique_User_loginId', ['login_id'])
 @Unique('Unique_User_nickname', ['nickname'])

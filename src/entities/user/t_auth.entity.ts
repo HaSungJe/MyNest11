@@ -1,5 +1,8 @@
 import { Column, Entity, Index, PrimaryColumn } from "typeorm";
 
+/**
+ * 권한 정보 Entity
+ */
 @Entity({name: 't_auth', comment: '권한 정보'})
 @Index(['order'])
 export class Auth {

@@ -1,6 +1,9 @@
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { User } from "./t_user.entity";
 
+/**
+ * 회원 로그인정보 Entity
+ */
 @Entity({name: 't_user_login', comment: '회원 로그인정보'})
 export class UserLogin {
     @PrimaryColumn({name: 'user_login_id', length: 32, comment: '회원 ID', primaryKeyConstraintName: 'PK_User'})

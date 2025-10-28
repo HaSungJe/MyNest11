@@ -1,8 +1,9 @@
-import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, Length, Matches } from "class-validator";
 
-// 회원가입
+/**
+ * 회원가입 Dto
+ */
 export class SignDto {
     @ApiProperty({description: '로그인 ID', required: true})
     @Matches(/^[a-zA-Z0-9]+$/, {message: '아이디는 영문 대소문자와 숫자만 사용 가능합니다.'})   

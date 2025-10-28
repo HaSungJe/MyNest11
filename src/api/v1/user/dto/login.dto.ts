@@ -1,9 +1,10 @@
-import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 import { ApiSuccessResultDto } from "@root/result.dto";
 import { IsNotEmpty } from "class-validator";
 
-// 로그인
+/**
+ * 로그인 Dto
+ */
 export class LoginDto {
 @ApiProperty({description: '아이디', required: true})
     @IsNotEmpty({message: '아이디를 입력해주세요.'})
@@ -68,7 +69,9 @@ export class LoginDto {
     }
 }
 
-// 로그인 성공 반환
+/**
+ *  로그인 성공 반환 ResultDto
+ */
 export class LoginSuccessResultDto extends ApiSuccessResultDto{
     @ApiProperty({description: '로그인 RefreshToken', required: true})
     refresh_token: string;

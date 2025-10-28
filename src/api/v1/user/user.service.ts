@@ -171,7 +171,7 @@ export class UserService {
     async checkLoginId(dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
         try {
             const builder = this.dataSource.createQueryBuilder();
-            builder.from(User, 'u');
+            builder.from('t_user', 'u');
             builder.where('u.login_id = :login_id', {login_id: dto.login_id});
             const count = await builder.getCount();
             if (count === 0) {
@@ -194,7 +194,7 @@ export class UserService {
     async checkNickname(dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
         try {
             const builder = this.dataSource.createQueryBuilder();
-            builder.from(User, 'u');
+            builder.from('t_user', 'u');
             builder.where('u.nickname = :nickname', {nickname: dto.nickname});
             const count = await builder.getCount(); 
             if (count === 0) {

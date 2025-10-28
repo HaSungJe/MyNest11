@@ -1,7 +1,9 @@
 import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 
-// Class-Validation Error
+/**
+ * 유효성검사 오류 DTO
+ */
 export class ValidationErrorDto {
     @ApiProperty({description: '유효성검사 반려 종류'})
     type: string;
@@ -13,13 +15,17 @@ export class ValidationErrorDto {
     message: string;
 }
 
-// 반환정보 성공
+/**
+ * API 요청 성공 반환 ResultDto
+ */
 export class ApiSuccessResultDto {
     @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.OK})
     statusCode: HttpStatus.OK;
 }
 
-// 반환정보 실패
+/**
+ * API 요청 실패 반환 ResultDto
+ */
 export class ApiFailResultDto {
     @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.BAD_REQUEST})
     statusCode: HttpStatus.BAD_REQUEST | HttpStatus.UNAUTHORIZED | HttpStatus.FORBIDDEN | HttpStatus.INTERNAL_SERVER_ERROR;
