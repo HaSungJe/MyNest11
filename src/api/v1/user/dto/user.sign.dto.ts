@@ -24,13 +24,13 @@ export class UserSignDto {
     @ApiProperty({description: '이름', required: true})
     @Matches(/^[가-힣a-zA-Z]+$/, {message: '이름은 한글 또는 영문 대소문자만 사용 가능합니다.'})
     @Length(2, 30, {message: '이름은 2자 이상 30자 이하로 입력해주세요.'})
-    @IsNotEmpty ({message: '이름을 입력해주세요.'})
+    @IsNotEmpty({message: '이름을 입력해주세요.'})
     name: string;
 
     @ApiProperty({description: '닉네임', required: true})
     @Matches(/^[가-힣a-zA-Z0-9]+$/, {message: '닉네임은 한글, 영문 대소문자, 숫자만 사용 가능합니다.'})
     @Length(2, 30, {message: '닉네임은 2자 이상 30자 이하로 입력해주세요.'})
-    @IsNotEmpty ({message: '닉네임을 입력해주세요.'})
+    @IsNotEmpty({message: '닉네임을 입력해주세요.'})
     nickname: string;
 }
 
