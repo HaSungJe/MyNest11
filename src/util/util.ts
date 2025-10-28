@@ -1,9 +1,22 @@
 import { utils, write, read } from 'xlsx-js-style';
 import { parseStringPromise } from 'xml2js';
+import { HttpStatus } from '@nestjs/common';
+import { ValidationErrorDto } from '@root/exception/validation.error.dto';
 import nodemailer from 'nodemailer';
 import sharp from 'sharp';
 import * as bcrypt from 'bcrypt';
-import { HttpStatus } from '@nestjs/common';
+
+/**
+ * Create Custom Class-Validation Reject Error
+ * - 유효성 검사 커스텀 생성
+ * 
+ * @param property 
+ * @param message 
+ * @returns 
+ */
+export function createValidationError(property: string, message: string): Array<ValidationErrorDto> {
+    return [{type: 'isBoolean', property, message}];
+}
 
 /**
  * 파일명 인코딩 체크
@@ -31,7 +44,7 @@ export function checkTimeFormat(v: string) {
  * @param {*} str 
  * @returns 
  */
-export async function changeBcrypt(str: string): Promise<string> {
+export async function getBcrypt(str: string): Promise<string> {
     return await bcrypt.hash(process.env.BCRYPT_CODE + str, 13);
 }
 

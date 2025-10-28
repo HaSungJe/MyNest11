@@ -5,6 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import { UserLogin } from '@root/entities/user/t_user_login.entity';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
+import { UserSignDto, UserSignFailResultDto, UserSignSuccessResultDto } from './dto/user.sign.dto';
+import { User } from '@root/entities/user/t_user.entity';
 
 @Injectable()
 export class UserService {
@@ -113,6 +115,45 @@ export class UserService {
         } catch (error) {
             await conn.rollbackTransaction();
             return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
+        } finally {
+            await conn.release();
+        }
+    }
+
+    /**
+     * 회원가입
+     * 
+     * @param dto 
+     * @returns 
+     */
+    async sign(dto: UserSignDto): Promise<UserSignSuccessResultDto | UserSignFailResultDto> {
+        const conn = this.dataSource.createQueryRunner();
+        await conn.startTransaction();
+
+        try {
+            const user = new User();
+            user.user_id = UUID().replaceAll('-', '');
+            user.login_id = dto.login_id;
+            user.login_pw = await util.getBcrypt(dto.login_pw);
+            user.name = dto.name;
+            user.nickname = dto.nickname;
+            user.auth_id = 'USER';
+            user.state_id = 'DONE';
+            await conn.manager.insert(User, user);
+
+            await conn.commitTransaction();
+            return { statusCode: HttpStatus.OK };
+        } catch (error) {
+            await conn.rollbackTransaction();
+            if (error.errno === 1062 && error.sqlMessage.indexOf('t_user.Unique_User_nickname') !== -1) {
+                const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
+                return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError };
+            } else if (error.errno === 1062 && error.sqlMessage.indexOf('t_user.Unique_User_loginId') !== -1) {
+                const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
+                return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError };
+            } else {
+                return { statusCode: HttpStatus.BAD_REQUEST, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
+            }
         } finally {
             await conn.release();
         }

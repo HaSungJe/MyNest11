@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import { Body, Controller, Get, Headers, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpException, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserLoginDto, UserLoginFailResultDto, UserLoginSuccessResultDto } from './dto/user.login.dto';
 import { ApiBadRequestResponse, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -7,6 +7,7 @@ import { ValidationErrorResultDto } from '@root/exception/validation.error.dto';
 import { PassportJwtAuthGuard } from '@root/guards/passport.jwt.auth/passport.jwt.auth.guard';
 import { PassportUserFailResultDto, PassportUserSuccessResultDto } from '@root/guards/passport.jwt.auth/passport.jwt.auth.dto';
 import * as requestIP from 'request-ip';
+import { UserSignDto, UserSignFailResultDto, UserSignSuccessResultDto } from './dto/user.sign.dto';
 
 @Controller('/api/v1/user')
 export class UserController {
@@ -60,5 +61,27 @@ export class UserController {
         return { statusCode: HttpStatus.OK, info: req.user };
     }
 
-    // 회원가입
+    /**
+     * 회원가입
+     * 
+     * @param dto 
+     * @returns 
+     */
+    @Put('/sign')
+    @ApiOperation({
+        summary: '회원가입',
+        description: '회원가입',
+    })
+    @ApiResponse({status: HttpStatus.OK, description: '성공', type: UserSignSuccessResultDto})
+    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: '아이디/비밀번호 중복', type: UserSignFailResultDto})
+    @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: UserSignFailResultDto})
+    @ApiBadRequestResponse({description: '유효성검증 실패', type: ValidationErrorResultDto})
+    async sign(@Body() dto: UserSignDto): Promise<UserSignSuccessResultDto | UserSignFailResultDto> {
+        const result = await this.service.sign(dto);
+        if (result?.statusCode === HttpStatus.OK) {
+            return result;
+        } else {
+            throw new HttpException(result, result?.statusCode);
+        }
+    }
 }
