@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, HttpException, HttpStatus, Ip, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { LoginDto, LoginSuccessResultDto } from './dto/login.dto';
+import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { ApiBadRequestResponse, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PassportJwtAuthGuard } from '@root/guards/passport.jwt.auth/passport.jwt.auth.guard';
 import { PassportUserFailResultDto, PassportUserResultDto, PassportUserSuccessResultDto } from '@root/guards/passport.jwt.auth/passport.jwt.auth.dto';
@@ -26,12 +26,12 @@ export class UserController {
     @Post('/login')
     @ApiOperation({summary: '로그인'})
     @ApiBody({type: LoginDto})
-    @ApiResponse({status: HttpStatus.OK, description: '성공', type: LoginSuccessResultDto})
+    @ApiResponse({status: HttpStatus.OK, description: '성공', type: LoginResultDto})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: '아이디 또는 비밀번호 불일치', type: ApiFailResultDto})
     @ApiResponse({status: HttpStatus.FORBIDDEN, description: '정지된 계정', type: ApiFailResultDto})
     @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: ApiFailResultDto})
     @ApiBadRequestResponse({description: '유효성검증 실패', type: ApiFailResultDto})
-    async login(@Headers('user-agent') agent: string, @Ip() ip: string, @Body() dto: LoginDto): Promise<LoginSuccessResultDto | ApiFailResultDto> {
+    async login(@Headers('user-agent') agent: string, @Ip() ip: string, @Body() dto: LoginDto): Promise<LoginResultDto | ApiFailResultDto> {
         dto = new LoginDto({...dto, agent, ip});
         const result = await this.service.login(dto);
         if (result.statusCode === HttpStatus.OK) {

@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { LoginDto, LoginSuccessResultDto } from './dto/login.dto';
+import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserLogin } from '@root/entities/user/t_user_login.entity';
 import { SignDto } from './dto/sign.dto';
@@ -25,7 +25,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async login(dto: LoginDto): Promise<LoginSuccessResultDto | ApiFailResultDto> {
+    async login(dto: LoginDto): Promise<LoginResultDto | ApiFailResultDto> {
         type LoginUserType = {
             user_id: string;
             login_id: string;

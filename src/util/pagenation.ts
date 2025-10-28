@@ -1,6 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-// 페이지탭에 표시될 페이지목록의 범위
+/**
+ * 페이지탭에 표시될 페이지목록의 범위
+ */
 class PageRangeResultDto {
     @ApiProperty({description: '시작값', required: true})
     start: number;
@@ -9,7 +11,9 @@ class PageRangeResultDto {
     end: number;
 }
 
-// 페이지 정보 
+/**
+ * 페이지 정보
+ */
 export class PagenationResultDto {
     @ApiProperty({description: '전체검색 여부(Y/N)', required: true})
     all_search_yn: string;
@@ -33,7 +37,9 @@ export class PagenationResultDto {
     content_start_number_reverse: number;
 }
 
-// 페이지 데이터 입력용
+/**
+ * 페이지정보 Dto
+ */
 export class PagenationDto {
     @ApiProperty({description: '페이지. 기본값: 1', required: false})
     page: number;
@@ -43,26 +49,12 @@ export class PagenationDto {
 
     @ApiProperty({description: '페이지탭에 출력될 페이지의 수. 기본값: 10', required: false})
     pageSize: number;
-
-    constructor(data: any) {
-        if (data) {
-            this.page = !isNaN(parseInt(data['page'])) ? parseInt(data['page']) : 1;
-            this.size = !isNaN(parseInt(data['size'])) ? parseInt(data['size']) : 10;
-            this.pageSize = !isNaN(parseInt(data['pageSize'])) ? parseInt(data['pageSize']) : 10;
-        }
-    }
-
-    getPageData() {
-        return {
-            page: this.page,
-            size: this.size,
-            pageSize: this.pageSize,
-        }
-    }
 }
 
-// 페이지 정보
-export class PagenationClass {
+/**
+ * 페이징
+ */
+export class Pagenation {
     public readonly all_search_yn: string = 'N'; // 전체검색 여부(Y/N)
     public readonly size: number; // 페이지당 출력될 데이터 수
     public readonly pageSize: number; // 페이지탭에 출력될 페이지의 수
