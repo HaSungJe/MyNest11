@@ -8,6 +8,7 @@ import { SignDto } from './dto/sign.dto';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
 import { ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
+import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 
 @ApiTags('회원')
 @Controller('/api/v1/user')
@@ -33,6 +34,28 @@ export class UserController {
     async login(@Headers('user-agent') agent: string, @Ip() ip: string, @Body() dto: LoginDto): Promise<LoginSuccessResultDto | ApiFailResultDto> {
         dto = new LoginDto({...dto, agent, ip});
         const result = await this.service.login(dto);
+        if (result.statusCode === HttpStatus.OK) {
+            return result;
+        } else {
+            throw new HttpException(result, result?.statusCode);
+        }
+    }
+
+    /**
+     * 로그인키 재발급
+     * 
+     * @param dto 
+     * @returns 
+     */
+    @Post('/refresh')
+    @ApiOperation({summary: '로그인키 재발급'})
+    @ApiResponse({status: HttpStatus.OK, description: '성공', type: RefreshResultDto})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: '인증 실패', type: ApiFailResultDto})
+    @ApiResponse({status: HttpStatus.FORBIDDEN, description: '정지된 계정', type: ApiFailResultDto})
+    @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: ApiFailResultDto})
+    @ApiBadRequestResponse({description: '유효성검증 실패', type: ApiFailResultDto})
+    async refresh(@Body() dto: RefreshDto): Promise<RefreshResultDto | ApiFailResultDto> {
+        const result = await this.service.refresh(dto);
         if (result.statusCode === HttpStatus.OK) {
             return result;
         } else {
@@ -87,7 +110,6 @@ export class UserController {
     @ApiOperation({summary: '아이디 중복 확인'})
     @ApiResponse({status: HttpStatus.OK, description: '성공', type: ApiSuccessResultDto})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: '아이디 중복', type: ApiFailResultDto})
-    @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: ApiFailResultDto})
     async checkLoginId(@Body() dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
         const result = await this.service.checkLoginId(dto);
         if (result.statusCode === HttpStatus.OK) {
@@ -107,7 +129,6 @@ export class UserController {
     @ApiOperation({summary: '닉네임 중복 확인'})
     @ApiResponse({status: HttpStatus.OK, description: '성공', type: ApiSuccessResultDto})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: '닉네임 중복', type: ApiFailResultDto})
-    @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: ApiFailResultDto})
     async checkNickname(@Body() dto: CheckNicknameDto) {
         const result = await this.service.checkNickname(dto);
         if (result.statusCode === HttpStatus.OK) {

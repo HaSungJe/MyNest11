@@ -8,6 +8,7 @@ import { User } from '@root/entities/user/t_user.entity';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
 import { ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
+import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
 
@@ -25,7 +26,7 @@ export class UserService {
      * @returns 
      */
     async login(dto: LoginDto): Promise<LoginSuccessResultDto | ApiFailResultDto> {
-        type LoginData = {
+        type LoginUserType = {
             user_id: string;
             login_id: string;
             login_pw: string;
@@ -56,7 +57,7 @@ export class UserService {
         builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
         builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
         builder.where('u.login_id = :login_id', {login_id: dto.login_id});
-        const user: LoginData = await builder.getRawOne();
+        const user: LoginUserType = await builder.getRawOne();
         if (user) {
             const match = await util.matchBcrypt(dto.login_pw, user.login_pw);
             if (!match) {
@@ -114,13 +115,110 @@ export class UserService {
         try {
             await conn.manager.insert(UserLogin, login);
             await conn.commitTransaction();
-            return { statusCode: HttpStatus.OK, refresh_token: refreshToken, access_token: accessToken, refresh_token_end_dt: refreshTokenEXP, access_token_end_dt: accessTokenEXP }
+            return { 
+                statusCode: HttpStatus.OK, 
+                refresh_token: refreshToken, 
+                access_token: accessToken, 
+                refresh_token_end_dt: refreshTokenEXP, 
+                access_token_end_dt: accessTokenEXP 
+            }
         } catch (error) {
             await conn.rollbackTransaction();
             return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
         } finally {
             await conn.release();
         }
+    }
+
+    /**
+     * 로그인키 재발급
+     * 
+     * @param dto 
+     * @returns 
+     */
+    async refresh(dto: RefreshDto): Promise<RefreshResultDto | ApiFailResultDto> {
+        type LoginUserDataType = {
+            user_id: string;
+            user_login_id: string;
+            access_token: string;
+            refresh_token: string;
+            auth_id: string;
+            login_able_yn: string;
+        }
+
+        // 1. 로그인 정보 확인
+        const builder = this.dataSource.createQueryBuilder();
+        builder.select(`
+              l.user_id
+            , l.user_login_id 
+            , l.access_token 
+            , l.refresh_token 
+            , a.auth_id 
+            , s.login_able_yn 
+        `);
+        builder.from('t_user_login', 'l');
+        builder.innerJoin('t_user', 'u', 'l.user_id = u.user_id and u.state_id = :state_id', {state_id: 'DONE'});
+        builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
+        builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
+        builder.where(`l.use_yn = :use_yn`, {use_yn: 'Y'});
+        builder.andWhere('l.refresh_token = :refresh_token', {refresh_token: dto.refresh_token})
+        builder.andWhere('now() < l.refresh_token_end_dt');
+        const user: LoginUserDataType = await builder.getRawOne();
+        if (!user) {
+            return { statusCode: HttpStatus.UNAUTHORIZED, message: '올바르지 않은 인증정보입니다.' };
+        } else if (user.login_able_yn === 'N') {
+            return { statusCode: HttpStatus.FORBIDDEN, message: '사용이 정지된 계정입니다. 관리자에게 문의해주세요.' }
+        }
+
+        // 2-1. Refresh Token 생성
+        const refreshToken = this.jwtService.sign({
+            type: 'refresh',
+            user_id: user.user_id,
+            auth_id: user.auth_id
+        }, {expiresIn: '90d'});
+        const refreshTokenDecode = await this.jwtService.decode(refreshToken);
+        const refreshTokenIAT = new Date(refreshTokenDecode['iat'] * 1000);
+        const refreshTokenEXP = new Date(refreshTokenDecode['exp'] * 1000);
+
+        // 2-2. Access Token 생성
+        const accessToken = this.jwtService.sign({
+            type: 'access',
+            user_id: user.user_id,
+            auth_id: user.auth_id
+        }, {expiresIn: '20m'})
+        const accessTokenDecode = await this.jwtService.decode(accessToken);
+        const accessTokenIAT = new Date(accessTokenDecode['iat'] * 1000);
+        const accessTokenEXP = new Date(accessTokenDecode['exp'] * 1000);
+
+        // 3. 로그인 이력 수정
+        const conn = this.dataSource.createQueryRunner();
+        await conn.startTransaction();
+
+        try {
+            await conn.manager.update(UserLogin, user.user_login_id, {
+                access_token: accessToken,
+                access_token_start_dt: accessTokenIAT,
+                access_token_end_dt: accessTokenEXP,
+                refresh_token: refreshToken,
+                refresh_token_start_dt: refreshTokenIAT,
+                refresh_token_end_dt: refreshTokenEXP
+            });
+
+            await conn.commitTransaction();
+            return { 
+                statusCode: HttpStatus.OK, 
+                refresh_token: refreshToken, 
+                access_token: accessToken, 
+                refresh_token_end_dt: refreshTokenEXP, 
+                access_token_end_dt: accessTokenEXP 
+            }
+        } catch (error) {
+            console.log(error);
+            await conn.rollbackTransaction();
+            return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
+        } finally {
+            await conn.release();
+        }   
     }
 
     /**
@@ -155,7 +253,7 @@ export class UserService {
                 const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
                 return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError };
             } else {
-                return { statusCode: HttpStatus.BAD_REQUEST, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
+                return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
             }
         } finally {
             await conn.release();
@@ -169,19 +267,15 @@ export class UserService {
      * @returns 
      */
     async checkLoginId(dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
-        try {
-            const builder = this.dataSource.createQueryBuilder();
-            builder.from('t_user', 'u');
-            builder.where('u.login_id = :login_id', {login_id: dto.login_id});
-            const count = await builder.getCount();
-            if (count === 0) {
-                return { statusCode: HttpStatus.OK };
-            } else {
-                const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
-                return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError };
-            }
-        } catch (error) {
-            return { statusCode: HttpStatus.BAD_REQUEST, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
+        const builder = this.dataSource.createQueryBuilder();
+        builder.from('t_user', 'u');
+        builder.where('u.login_id = :login_id', {login_id: dto.login_id});
+        const count = await builder.getCount();
+        if (count === 0) {
+            return { statusCode: HttpStatus.OK };
+        } else {
+            const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
+            return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError };
         }
     }
 
@@ -192,19 +286,15 @@ export class UserService {
      * @returns 
      */
     async checkNickname(dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
-        try {
-            const builder = this.dataSource.createQueryBuilder();
-            builder.from('t_user', 'u');
-            builder.where('u.nickname = :nickname', {nickname: dto.nickname});
-            const count = await builder.getCount(); 
-            if (count === 0) {
-                return { statusCode: HttpStatus.OK };
-            } else {
-                const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
-                return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError };
-            } 
-        } catch (error) {
-            return { statusCode: HttpStatus.BAD_REQUEST, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
-        }
+        const builder = this.dataSource.createQueryBuilder();
+        builder.from('t_user', 'u');
+        builder.where('u.nickname = :nickname', {nickname: dto.nickname});
+        const count = await builder.getCount(); 
+        if (count === 0) {
+            return { statusCode: HttpStatus.OK };
+        } else {
+            const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
+            return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError };
+        } 
     }
 }

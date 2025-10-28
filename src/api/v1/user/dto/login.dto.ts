@@ -72,7 +72,7 @@ export class LoginDto {
 /**
  *  로그인 성공 반환 ResultDto
  */
-export class LoginSuccessResultDto extends ApiSuccessResultDto{
+export class LoginSuccessResultDto extends ApiSuccessResultDto {
     @ApiProperty({description: '로그인 RefreshToken', required: true})
     refresh_token: string;
 
