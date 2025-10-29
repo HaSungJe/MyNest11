@@ -18,10 +18,6 @@ export class AuthGuard implements CanActivate {
         }
 
         const { user } = context.switchToHttp().getRequest();
-        if (user?.jwt_guard_pass) {
-            return requiredAuths.some((auth_id: string) => auth_id === user.auth_id);
-        } else {
-            return false;
-        }
+        return requiredAuths.some((auth_id: string) => auth_id === user.auth_id);
     }
 }
