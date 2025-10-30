@@ -14,7 +14,7 @@ require('dotenv').config({path: path.resolve(__dirname, '../../.env')});
             secret: process.env.JWT_CODE,
             signOptions: { expiresIn: '1h' },
         }),
-        NestPassportModule.register({ defaultStrategy: 'jwt-user' })
+        NestPassportModule
     ],
     exports: [NestJwtModule, PassPortJwtAuthService],
     providers: [PassportJwtAuthStrategy, PassPortJwtAuthService]
