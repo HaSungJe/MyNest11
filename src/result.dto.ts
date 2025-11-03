@@ -41,7 +41,7 @@ export class ApiBadRequestResultDto {
  * API 요청 실패 반환 - 401, 403, 500, 502
  */
 export class ApiFailResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.BAD_REQUEST})
+    @ApiProperty({description: 'http 상태코드', required: true, example: '401, 403, 500, 502'})
     statusCode: HttpStatus.UNAUTHORIZED | HttpStatus.FORBIDDEN | HttpStatus.INTERNAL_SERVER_ERROR | HttpStatus.BAD_GATEWAY;
 
     @ApiProperty({description: '메세지', required: true})
