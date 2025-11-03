@@ -7,7 +7,7 @@ import { SignDto } from './dto/sign.dto';
 import { User } from '@root/entities/user/t_user.entity';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
@@ -25,7 +25,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async login(dto: LoginDto): Promise<LoginResultDto | ApiFailResultDto> {
+    async login(dto: LoginDto): Promise<LoginResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         type LoginUserType = {
             user_id: string;
             login_id: string;
@@ -136,7 +136,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async refresh(dto: RefreshDto): Promise<RefreshResultDto | ApiFailResultDto> {
+    async refresh(dto: RefreshDto): Promise<RefreshResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         type LoginUserDataType = {
             user_id: string;
             user_login_id: string;
@@ -213,7 +213,6 @@ export class UserService {
                 access_token_end_dt: accessTokenEXP 
             }
         } catch (error) {
-            console.log(error);
             await conn.rollbackTransaction();
             return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
         } finally {
@@ -227,7 +226,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async sign(dto: SignDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+    async sign(dto: SignDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         const conn = this.dataSource.createQueryRunner();
         await conn.startTransaction();
 
@@ -266,7 +265,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async checkLoginId(dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+    async checkLoginId(dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
         const builder = this.dataSource.createQueryBuilder();
         builder.from('t_user', 'u');
         builder.where('u.login_id = :login_id', {login_id: dto.login_id});
@@ -285,7 +284,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async checkNickname(dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+    async checkNickname(dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
         const builder = this.dataSource.createQueryBuilder();
         builder.from('t_user', 'u');
         builder.where('u.nickname = :nickname', {nickname: dto.nickname});

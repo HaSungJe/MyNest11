@@ -24,15 +24,27 @@ export class ApiSuccessResultDto {
 }
 
 /**
- * API 요청 실패 반환 ResultDto
+ * API 요청 실패 반환 - 400
  */
-export class ApiFailResultDto {
+export class ApiBadRequestResultDto {
     @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.BAD_REQUEST})
-    statusCode: HttpStatus.BAD_REQUEST | HttpStatus.UNAUTHORIZED | HttpStatus.FORBIDDEN | HttpStatus.INTERNAL_SERVER_ERROR;
+    statusCode: HttpStatus.BAD_REQUEST;
 
     @ApiProperty({description: '메세지', required: true})
     message: string;
 
-    @ApiProperty({description: '에러 목록', isArray: true, type: () => ValidationErrorDto})
+    @ApiProperty({description: '에러 목록', isArray: true, type: () => ValidationErrorDto, required: false})
     validationError?: Array<ValidationErrorDto>;
 }
+
+/**
+ * API 요청 실패 반환 - 401, 403, 500, 502
+ */
+export class ApiFailResultDto {
+    @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.BAD_REQUEST})
+    statusCode: HttpStatus.UNAUTHORIZED | HttpStatus.FORBIDDEN | HttpStatus.INTERNAL_SERVER_ERROR | HttpStatus.BAD_GATEWAY;
+
+    @ApiProperty({description: '메세지', required: true})
+    message: string;
+}
+

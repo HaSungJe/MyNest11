@@ -25,7 +25,7 @@ export class AdminUserService {
             builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
             builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
             builder.where('1 = 1');
-            const totalCount = await builder.getCount();
+            const total_count = await builder.getCount();
             
             // 2. 조건
             if (dto.search_value) {
@@ -67,7 +67,7 @@ export class AdminUserService {
             builder.offset(pagenation.offset);
             const list: Array<AdminUserListVO> = await builder.getRawMany();
 
-            return { statusCode: HttpStatus.OK, list, pagenation: pagenation.getPagenation() };
+            return { statusCode: HttpStatus.OK, list, total_count, pagenation: pagenation.getPagenation() };
         } catch (error) {
             return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
         }

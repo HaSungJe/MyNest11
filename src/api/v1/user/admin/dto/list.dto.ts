@@ -21,6 +21,9 @@ export class AdminUserListDto extends PagenationDto {
  * 회원 목록 반환 Dto
  */
 export class AdminUserListResultDto extends ApiSuccessResultDto {
+    @ApiProperty({description: '총 개수', required: true})
+    total_count: number;
+
     @ApiProperty({description: '페이지 정보', required: true, type: () => PagenationResultDto})
     pagenation: PagenationResultDto;
 

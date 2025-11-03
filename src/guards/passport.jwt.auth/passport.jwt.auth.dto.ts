@@ -33,12 +33,3 @@ export class PassportUserSuccessResultDto {
     @ApiProperty(({description: '회원 정보', required: true, type: PassportUserResultDto}))
     info: PassportUserResultDto;
 }
-
-// 로그인한 회원의 정보 - 실패
-export class PassportUserFailResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: HttpStatus.UNAUTHORIZED
-
-    @ApiProperty({description: '실패 메세지', required: false})
-    message: string;
-}

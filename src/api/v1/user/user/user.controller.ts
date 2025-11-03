@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Headers, HttpException, HttpStatus, Ip, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { PassportJwtAuthGuard } from '@root/guards/passport.jwt.auth/passport.jwt.auth.guard';
-import { PassportUserFailResultDto, PassportUserResultDto, PassportUserSuccessResultDto } from '@root/guards/passport.jwt.auth/passport.jwt.auth.dto';
+import { PassportUserResultDto, PassportUserSuccessResultDto } from '@root/guards/passport.jwt.auth/passport.jwt.auth.dto';
 import { SignDto } from './dto/sign.dto';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 
 @ApiTags('회원')
@@ -27,12 +27,12 @@ export class UserController {
     @Post('/login')
     @ApiOperation({summary: '로그인'})
     @ApiBody({type: LoginDto})
-    @ApiResponse({status: HttpStatus.OK, description: '성공', type: LoginResultDto})
-    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: '아이디 또는 비밀번호 불일치', type: ApiFailResultDto})
-    @ApiResponse({status: HttpStatus.FORBIDDEN, description: '정지된 계정', type: ApiFailResultDto})
-    @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: ApiFailResultDto})
-    @ApiBadRequestResponse({description: '유효성검증 실패', type: ApiFailResultDto})
-    async login(@Headers('user-agent') agent: string, @Ip() ip: string, @Body() dto: LoginDto): Promise<LoginResultDto | ApiFailResultDto> {
+    @ApiOkResponse({type: LoginResultDto})
+    @ApiBadRequestResponse({type: ApiBadRequestResultDto})
+    @ApiUnauthorizedResponse({type: ApiFailResultDto})
+    @ApiForbiddenResponse({type: ApiFailResultDto})
+    @ApiInternalServerErrorResponse({type: ApiFailResultDto})
+    async login(@Headers('user-agent') agent: string, @Ip() ip: string, @Body() dto: LoginDto): Promise<LoginResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         dto = new LoginDto({...dto, agent, ip});
         const result = await this.service.login(dto);
         if (result.statusCode === HttpStatus.OK) {
@@ -50,12 +50,12 @@ export class UserController {
      */
     @Post('/refresh')
     @ApiOperation({summary: '로그인키 재발급'})
-    @ApiResponse({status: HttpStatus.OK, description: '성공', type: RefreshResultDto})
-    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: '인증 실패', type: ApiFailResultDto})
-    @ApiResponse({status: HttpStatus.FORBIDDEN, description: '정지된 계정', type: ApiFailResultDto})
-    @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: ApiFailResultDto})
-    @ApiBadRequestResponse({description: '유효성검증 실패', type: ApiFailResultDto})
-    async refresh(@Body() dto: RefreshDto): Promise<RefreshResultDto | ApiFailResultDto> {
+    @ApiOkResponse({type: RefreshResultDto})
+    @ApiBadRequestResponse({type: ApiBadRequestResultDto})
+    @ApiUnauthorizedResponse({type: ApiFailResultDto})
+    @ApiForbiddenResponse({type: ApiFailResultDto})
+    @ApiInternalServerErrorResponse({type: ApiFailResultDto})
+    async refresh(@Body() dto: RefreshDto): Promise<RefreshResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         const result = await this.service.refresh(dto);
         if (result.statusCode === HttpStatus.OK) {
             return result;
@@ -73,9 +73,9 @@ export class UserController {
     @Get('/info')
     @ApiOperation({summary: '내 정보'})
     @UseGuards(PassportJwtAuthGuard)
-    @ApiResponse({status: HttpStatus.OK, description: '성공', type: PassportUserSuccessResultDto})
-    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: '로그인하지 않은 상태', type: PassportUserFailResultDto})
-    async info(@Req() req: any): Promise<PassportUserSuccessResultDto | PassportUserFailResultDto> {
+    @ApiOkResponse({type: PassportUserSuccessResultDto})
+    @ApiUnauthorizedResponse({type: ApiFailResultDto})
+    async info(@Req() req: any): Promise<PassportUserSuccessResultDto | ApiFailResultDto> {
         const info: PassportUserResultDto = req.user;
         return { statusCode: HttpStatus.OK, info };
     }
@@ -88,11 +88,10 @@ export class UserController {
      */
     @Put('/sign')
     @ApiOperation({summary: '회원가입'})
-    @ApiResponse({status: HttpStatus.OK, description: '성공', type: ApiSuccessResultDto})
-    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: '아이디/비밀번호 중복', type: ApiFailResultDto})
-    @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: ApiFailResultDto})
-    @ApiBadRequestResponse({description: '유효성검증 실패', type: ApiFailResultDto})
-    async sign(@Body() dto: SignDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+    @ApiOkResponse({type: ApiSuccessResultDto})
+    @ApiBadRequestResponse({type: ApiBadRequestResultDto})
+    @ApiInternalServerErrorResponse({type: ApiFailResultDto})
+    async sign(@Body() dto: SignDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         const result = await this.service.sign(dto);
         if (result.statusCode === HttpStatus.OK) {
             return result;
@@ -109,9 +108,9 @@ export class UserController {
      */
     @Post('/check/id')
     @ApiOperation({summary: '아이디 중복 확인'})
-    @ApiResponse({status: HttpStatus.OK, description: '성공', type: ApiSuccessResultDto})
-    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: '아이디 중복', type: ApiFailResultDto})
-    async checkLoginId(@Body() dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+    @ApiOkResponse({type: ApiSuccessResultDto})
+    @ApiBadRequestResponse({type: ApiBadRequestResultDto})
+    async checkLoginId(@Body() dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
         const result = await this.service.checkLoginId(dto);
         if (result.statusCode === HttpStatus.OK) {
             return result;
@@ -128,9 +127,9 @@ export class UserController {
      */
     @Post('/check/nickname')
     @ApiOperation({summary: '닉네임 중복 확인'})
-    @ApiResponse({status: HttpStatus.OK, description: '성공', type: ApiSuccessResultDto})
-    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: '닉네임 중복', type: ApiFailResultDto})
-    async checkNickname(@Body() dto: CheckNicknameDto) {
+    @ApiOkResponse({type: ApiSuccessResultDto})
+    @ApiBadRequestResponse({type: ApiBadRequestResultDto})
+    async checkNickname(@Body() dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
         const result = await this.service.checkNickname(dto);
         if (result.statusCode === HttpStatus.OK) {
             return result;

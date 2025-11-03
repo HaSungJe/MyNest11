@@ -1,5 +1,5 @@
 import { Controller, Get, HttpException, HttpStatus, Query, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AdminUserService } from "./admin.user.service";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
 import { ApiFailResultDto } from "@root/result.dto";
@@ -25,8 +25,8 @@ export class AdminUserController {
     @UseGuards(PassportJwtAuthGuard, AuthGuard)
     @Auths('ADMIN, SUPER_ADMIN')
     @ApiOperation({summary: '회원 목록'})
-    @ApiResponse({status: HttpStatus.OK, description: '성공', type: AdminUserListResultDto})
-    @ApiResponse({status: HttpStatus.INTERNAL_SERVER_ERROR, description: '서버 오류', type: ApiFailResultDto})
+    @ApiOkResponse({type: AdminUserListResultDto})
+    @ApiInternalServerErrorResponse({type: ApiFailResultDto})
     async list(@Query() dto: AdminUserListDto): Promise<AdminUserListResultDto | ApiFailResultDto> {
         const result = await this.service.list(dto);
         if (result.statusCode === HttpStatus.OK) {
