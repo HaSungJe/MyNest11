@@ -296,4 +296,26 @@ export class UserService {
             return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError };
         } 
     }
+
+    /**
+     * 회원 탈퇴
+     * 
+     * @param user_id 
+     * @returns 
+     */
+    async leave(user_id: string): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+        const conn = this.dataSource.createQueryRunner();
+        await conn.startTransaction();
+
+        try {
+            await conn.manager.update(User, user_id, { state_id: 'LEAVE' });
+            await conn.commitTransaction();
+            return { statusCode: HttpStatus.OK };
+        } catch (error) {
+            await conn.rollbackTransaction();
+            return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
+        } finally {
+            await conn.release();
+        }
+    }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, HttpException, HttpStatus, Ip, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpException, HttpStatus, Ip, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
@@ -131,6 +131,23 @@ export class UserController {
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
     async checkNickname(@Body() dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
         const result = await this.service.checkNickname(dto);
+        if (result.statusCode === HttpStatus.OK) {
+            return result;
+        } else {
+            throw new HttpException(result, result?.statusCode);
+        }
+    }
+
+    // 회원탈퇴
+    @Delete('/leave')
+    @ApiOperation({summary: '회원탈퇴'})
+    @UseGuards(PassportJwtAuthGuard)
+    @ApiOkResponse({type: ApiSuccessResultDto})
+    @ApiUnauthorizedResponse({type: ApiFailResultDto})
+    @ApiForbiddenResponse({type: ApiFailResultDto})
+    @ApiInternalServerErrorResponse({type: ApiFailResultDto})
+    async leave(@Req() req: any): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+        const result = await this.service.leave(req.user.id);
         if (result.statusCode === HttpStatus.OK) {
             return result;
         } else {
