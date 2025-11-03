@@ -99,18 +99,51 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 
 ## 환경변수 설정가이드
-# Server
-SERVER_NAME=서버명<br />
-SERVER=개발모드. DEV: 개발, SERVER: 배포<br />
-SERVER_PORT=포트
-
-# MySQL
-TYPEORM_SYNC=T: 동기화<br />
-MYSQL_HOST=MySQL 주소<br />
-MYSQL_PORT=MySQL 포트<br />
-MYSQL_DB=MySQL 데이터베이스<br />
-MYSQL_ID=MySQL 아이디<br />
-MYSQL_PW=MySQL 패스워드
-
-# JWT 암호화 키
-JWT_SECRET=jwt 암호화 키
+<table>
+  <colgroup>
+    <col width="40%">
+    <col width="40%">
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>SERVER_NAME</th>
+      <td>서버명</td>
+    </tr>
+    <tr>
+      <th>SERVER</th>
+      <td>개발모드. DEV: 개발, SERVER: 배포</td>
+    </tr>
+    <tr>
+      <th>SERVER_PORT</th>
+      <td>포트</td>
+    </tr>
+    <tr>
+      <th>TYPEORM_SYNC</th>
+      <td>테이블 동기화여부. T: 동기화</td>
+    </tr>
+    <tr>
+      <th>MYSQL_HOST</th>
+      <td>MySQL 주소</td>
+    </tr>
+    <tr>
+      <th>MYSQL_PORT</th>
+      <td>MySQL 포트</td>
+    </tr>
+    <tr>
+      <th>MYSQL_DB</th>
+      <td>MySQL 데이터베이스</td>
+    </tr>
+    <tr>
+      <th>MYSQL_ID</th>
+      <td>MySQL 아이디</td>
+    </tr>
+    <tr>
+      <th>MYSQL_PW</th>
+      <td>MySQL 패스워드</td>
+    </tr>
+    <tr>
+      <th>JWT_SECRET</th>
+      <td>jwt 암호화 키</td>
+    </tr>
+  <thead>
+</table>
