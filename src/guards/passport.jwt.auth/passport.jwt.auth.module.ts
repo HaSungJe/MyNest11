@@ -11,7 +11,7 @@ require('dotenv').config({path: path.resolve(__dirname, '../../.env')});
     imports: [
         TypeORMModule,
         NestJwtModule.register({
-            secret: process.env.JWT_CODE,
+            secret: process.env.JWT_SECRET,
             signOptions: { expiresIn: '1h' },
         }),
         NestPassportModule

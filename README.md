@@ -96,3 +96,21 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+## 환경변수 설정가이드
+# Server
+SERVER_NAME=서버명
+SERVER=개발모드. DEV: 개발, SERVER: 배포
+SERVER_PORT=포트
+
+# MySQL
+TYPEORM_SYNC=T: 동기화
+MYSQL_HOST=MySQL 주소
+MYSQL_PORT=MySQL 포트
+MYSQL_DB=MySQL 데이터베이스
+MYSQL_ID=MySQL 아이디
+MYSQL_PW=MySQL 패스워드
+
+# JWT 암호화 키
+JWT_SECRET=jwt 암호화 키
