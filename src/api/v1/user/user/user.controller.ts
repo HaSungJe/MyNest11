@@ -138,7 +138,12 @@ export class UserController {
         }
     }
 
-    // 회원탈퇴
+    /**
+     * 회원탈퇴
+     * 
+     * @param req 
+     * @returns 
+     */
     @Delete('/leave')
     @ApiOperation({summary: '회원탈퇴'})
     @UseGuards(PassportJwtAuthGuard)

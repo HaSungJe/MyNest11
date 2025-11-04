@@ -5,6 +5,7 @@ module.exports = {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
   moduleNameMapper: {
-    '^@root/(.*)$': '<rootDir>/src/$1'
+    '^@root/(.*)$': '<rootDir>/src/$1',
+    '^@util/(.*)$': '<rootDir>/src/util/$1'
   },
 };
