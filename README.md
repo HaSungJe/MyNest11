@@ -98,52 +98,40 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 
-## 환경변수 설정가이드
-<table>
-  <colgroup>
-    <col width="40%">
-    <col width="40%">
-  </colgroup>
-  <tbody>
-    <tr>
-      <th>SERVER_NAME</th>
-      <td>서버명</td>
-    </tr>
-    <tr>
-      <th>SERVER</th>
-      <td>개발모드. DEV: 개발, SERVER: 배포</td>
-    </tr>
-    <tr>
-      <th>SERVER_PORT</th>
-      <td>포트</td>
-    </tr>
-    <tr>
-      <th>TYPEORM_SYNC</th>
-      <td>테이블 동기화여부. T: 동기화</td>
-    </tr>
-    <tr>
-      <th>MYSQL_HOST</th>
-      <td>MySQL 주소</td>
-    </tr>
-    <tr>
-      <th>MYSQL_PORT</th>
-      <td>MySQL 포트</td>
-    </tr>
-    <tr>
-      <th>MYSQL_DB</th>
-      <td>MySQL 데이터베이스</td>
-    </tr>
-    <tr>
-      <th>MYSQL_ID</th>
-      <td>MySQL 아이디</td>
-    </tr>
-    <tr>
-      <th>MYSQL_PW</th>
-      <td>MySQL 패스워드</td>
-    </tr>
-    <tr>
-      <th>JWT_SECRET</th>
-      <td>jwt 암호화 키</td>
-    </tr>
-  <thead>
-</table>
+## 환경 설정 가이드
+
+프로젝트를 실행하기 전에 다음 환경 변수들을 설정해주세요. `.env` 파일을 생성하여 아래 변수들을 설정할 수 있습니다.
+
+### 서버 설정
+| 변수명 | 설명 | 기본값 |
+|--------|------|--------|
+| `SERVER_NAME` | 서버 식별 이름 | - |
+| `SERVER` | 서버 실행 모드 (`DEV`: 개발, `PROD`: 프로덕션) | `DEV` |
+| `SERVER_PORT` | 서버 포트 | `3000` |
+| `TYPEORM_SYNC` | 데이터베이스 테이블 자동 동기화 여부 (`true`/`false`) | `false` |
+| `JWT_SECRET` | JWT 토큰 암호화에 사용되는 시크릿 키 | - |
+
+### 데이터베이스 설정 (MySQL)
+| 변수명 | 설명 | 기본값 |
+|--------|------|--------|
+| `MYSQL_HOST` | 데이터베이스 호스트 주소 | `localhost` |
+| `MYSQL_PORT` | 데이터베이스 포트 | `3306` |
+| `MYSQL_DB` | 데이터베이스 이름 | - |
+| `MYSQL_ID` | 데이터베이스 사용자 ID | - |
+| `MYSQL_PW` | 데이터베이스 사용자 비밀번호 | - |
+
+### .env 파일 예시
+```env
+# 서버 설정
+SERVER_NAME=my-nest-app
+SERVER=DEV
+SERVER_PORT=3000
+TYPEORM_SYNC=false
+JWT_SECRET=your-secret-key-here
+
+# 데이터베이스 설정
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DB=nest_db
+MYSQL_ID=db_user
+MYSQL_PW=db_password
