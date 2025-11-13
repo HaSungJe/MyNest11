@@ -1,8 +1,8 @@
 import { Controller, Get, HttpException, HttpStatus, Query, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AdminUserService } from "./admin.user.service";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
-import { ApiFailResultDto } from "@root/result.dto";
+import { ApiFailResultDto } from "@root/global.result.dto";
 import { PassportJwtAuthGuard } from "@root/guards/passport.jwt.auth/passport.jwt.auth.guard";
 import { AuthGuard } from "@root/guards/auth/auth.guard";
 import { Auths } from "@root/guards/auth/auth.decorator";

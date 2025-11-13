@@ -7,7 +7,7 @@ import { SignDto } from './dto/sign.dto';
 import { User } from '@root/entities/user/t_user.entity';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';

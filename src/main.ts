@@ -4,7 +4,7 @@ import { CustomErrorFilter } from './exception/exception';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { ApiBadRequestResultDto, ValidationErrorDto } from './result.dto';
+import { ApiBadRequestResultDto, ValidationErrorDto } from './global.result.dto';
 import dayjs from 'dayjs';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';

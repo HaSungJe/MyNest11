@@ -1,7 +1,7 @@
 import { utils, write, read } from 'xlsx-js-style';
 import { parseStringPromise } from 'xml2js';
 import { HttpStatus } from '@nestjs/common';
-import { ValidationErrorDto } from '@root/result.dto';
+import { ValidationErrorDto } from '@root/global.result.dto';
 import nodemailer from 'nodemailer';
 import sharp from 'sharp';
 import * as bcrypt from 'bcrypt';

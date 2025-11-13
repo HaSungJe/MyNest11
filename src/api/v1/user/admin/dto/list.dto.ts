@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ApiSuccessResultDto } from "@root/result.dto";
+import { ApiSuccessResultDto } from "@root/global.result.dto";
 import { PagenationDto, PagenationResultDto } from "@root/util/pagenation";
 import { AdminUserListVO } from "../vo/list.vo";
 

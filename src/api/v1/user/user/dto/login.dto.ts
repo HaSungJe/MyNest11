@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ApiSuccessResultDto } from "@root/result.dto";
+import { ApiSuccessResultDto } from "@root/global.result.dto";
 import { IsNotEmpty } from "class-validator";
 
 /**

@@ -7,7 +7,7 @@ import { PassportUserResultDto, PassportUserSuccessResultDto } from '@root/guard
 import { SignDto } from './dto/sign.dto';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 
 @ApiTags('회원')

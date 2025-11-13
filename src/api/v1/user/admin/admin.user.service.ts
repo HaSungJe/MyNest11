@@ -3,7 +3,7 @@ import { Pagenation } from "@root/util/pagenation";
 import { DataSource } from "typeorm";
 import { AdminUserListVO } from "./vo/list.vo";
 import { AdminUserListResultDto } from "./dto/list.dto";
-import { ApiFailResultDto } from "@root/result.dto";
+import { ApiFailResultDto } from "@root/global.result.dto";
 
 @Injectable()
 export class AdminUserService {
