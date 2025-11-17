@@ -3,7 +3,7 @@ import { JwtModule as NestJwtModule } from '@nestjs/jwt';
 import { PassportJwtAuthStrategy } from './passport.jwt.auth.strategy';
 import { PassportModule as NestPassportModule} from '@nestjs/passport';
 import { PassPortJwtAuthService } from './passport.jwt.auth.service';
-import { TypeORMModule } from '@root/modules/typeorm/typeorm.module';
+import { TypeORMModule } from '@root/api/shared/typeorm/typeorm.module';
 import * as path from 'path';
 require('dotenv').config({path: path.resolve(__dirname, '../../.env')});
 

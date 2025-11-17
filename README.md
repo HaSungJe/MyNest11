@@ -23,7 +23,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This is a NestJS project with a custom configuration.
 
 ## Project setup
 
@@ -108,7 +108,7 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 | `SERVER_NAME` | 서버 식별 이름 | - |
 | `SERVER` | 서버 실행 모드 (`DEV`: 개발, `PROD`: 프로덕션) | `DEV` |
 | `SERVER_PORT` | 서버 포트 | `3000` |
-| `TYPEORM_SYNC` | 데이터베이스 테이블 자동 동기화 여부 (`true`/`false`) | `false` |
+| `TYPEORM_SYNC` | 데이터베이스 테이블 자동 동기화 여부 (`T`/`F`) | `F` |
 | `JWT_SECRET` | JWT 토큰 암호화에 사용되는 시크릿 키 | - |
 
 ### 데이터베이스 설정 (MySQL)
@@ -126,7 +126,7 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 SERVER_NAME=my-nest-app
 SERVER=DEV
 SERVER_PORT=3000
-TYPEORM_SYNC=false
+TYPEORM_SYNC=F
 JWT_SECRET=your-secret-key-here
 
 # 데이터베이스 설정

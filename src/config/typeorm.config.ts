@@ -1,7 +1,5 @@
-
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { config } from 'dotenv';
-import getEntites from '@root/entities';
 
 // 환경변수 로드
 config();
@@ -13,7 +11,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     database: process.env.MYSQL_DB,
     username: process.env.MYSQL_ID,
     password: process.env.MYSQL_PW,
-    entities: getEntites(),
+    autoLoadEntities: true,
     synchronize: process.env.TYPEORM_SYNC === 'T',
     logging: false,
 };

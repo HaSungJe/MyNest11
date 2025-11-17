@@ -2,13 +2,14 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { UserLogin } from '@root/entities/user/t_user_login.entity';
+import { UserLogin } from '../entities/t_user_login.entity';
 import { SignDto } from './dto/sign.dto';
-import { User } from '@root/entities/user/t_user.entity';
+import { User } from '../entities/t_user.entity';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
 import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
+import { UserRepository } from '../repositories/user.repository';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
 
@@ -16,7 +17,8 @@ import * as util from '@util/util';
 export class UserService {
     constructor(
         private readonly dataSource: DataSource,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        private readonly userRepository: UserRepository
     ) {}
 
     /**
@@ -42,7 +44,7 @@ export class UserService {
         // 1. 아이디/비밀번호 확인
         const builder = this.dataSource.createQueryBuilder();
         builder.select(`
-              u.user_id 
+            u.user_id 
             , u.login_id 
             , u.login_pw 
             , u.name 
@@ -54,7 +56,7 @@ export class UserService {
             , s.login_able_yn 
         `);
         builder.from('t_user', 'u');
-        builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
+        builder.innerJoin('t_state', 's', 'u.state_id = s.state_id and s.state_id = :state_id', {state_id: 'DONE'});
         builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
         builder.where('u.login_id = :login_id', {login_id: dto.login_id});
         const user: LoginUserType = await builder.getRawOne();
@@ -266,10 +268,7 @@ export class UserService {
      * @returns 
      */
     async checkLoginId(dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
-        const builder = this.dataSource.createQueryBuilder();
-        builder.from('t_user', 'u');
-        builder.where('u.login_id = :login_id', {login_id: dto.login_id});
-        const count = await builder.getCount();
+        const count = await this.userRepository.count({ where: { login_id: dto.login_id } });
         if (count === 0) {
             return { statusCode: HttpStatus.OK };
         } else {
@@ -285,10 +284,7 @@ export class UserService {
      * @returns 
      */
     async checkNickname(dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
-        const builder = this.dataSource.createQueryBuilder();
-        builder.from('t_user', 'u');
-        builder.where('u.nickname = :nickname', {nickname: dto.nickname});
-        const count = await builder.getCount(); 
+        const count = await this.userRepository.count({ where: { nickname: dto.nickname } });
         if (count === 0) {
             return { statusCode: HttpStatus.OK };
         } else {
