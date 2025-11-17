@@ -9,7 +9,8 @@ import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
 import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
-import { UserRepository } from '../repositories/user.repository';
+import { FindUserType, UserRepository } from './repositories/user.repository';
+import { UserLoginRepository } from './repositories/user-login.repository';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
 
@@ -18,7 +19,8 @@ export class UserService {
     constructor(
         private readonly dataSource: DataSource,
         private readonly jwtService: JwtService,
-        private readonly userRepository: UserRepository
+        private readonly userRepository: UserRepository,
+        private readonly userLoginRepository: UserLoginRepository,
     ) {}
 
     /**
@@ -28,38 +30,8 @@ export class UserService {
      * @returns 
      */
     async login(dto: LoginDto): Promise<LoginResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
-        type LoginUserType = {
-            user_id: string;
-            login_id: string;
-            login_pw: string;
-            name: string;
-            nickname: string;
-            auth_id: string 
-            auth_name: string;
-            state_id: string;
-            state_name: string;
-            login_able_yn: string;
-        }
-
         // 1. 아이디/비밀번호 확인
-        const builder = this.dataSource.createQueryBuilder();
-        builder.select(`
-            u.user_id 
-            , u.login_id 
-            , u.login_pw 
-            , u.name 
-            , u.nickname 
-            , a.auth_id 
-            , a.auth_name 
-            , s.state_id 
-            , s.state_name 
-            , s.login_able_yn 
-        `);
-        builder.from('t_user', 'u');
-        builder.innerJoin('t_state', 's', 'u.state_id = s.state_id and s.state_id = :state_id', {state_id: 'DONE'});
-        builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
-        builder.where('u.login_id = :login_id', {login_id: dto.login_id});
-        const user: LoginUserType = await builder.getRawOne();
+        const user: FindUserType = await this.userRepository.findUserForLoginId(dto.login_id);
         if (user) {
             const match = await util.matchBcrypt(dto.login_pw, user.login_pw);
             if (!match) {
@@ -149,23 +121,7 @@ export class UserService {
         }
 
         // 1. 로그인 정보 확인
-        const builder = this.dataSource.createQueryBuilder();
-        builder.select(`
-              l.user_id
-            , l.user_login_id 
-            , l.access_token 
-            , l.refresh_token 
-            , a.auth_id 
-            , s.login_able_yn 
-        `);
-        builder.from('t_user_login', 'l');
-        builder.innerJoin('t_user', 'u', 'l.user_id = u.user_id and u.state_id = :state_id', {state_id: 'DONE'});
-        builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
-        builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
-        builder.where(`l.use_yn = :use_yn`, {use_yn: 'Y'});
-        builder.andWhere('l.refresh_token = :refresh_token', {refresh_token: dto.refresh_token})
-        builder.andWhere('now() < l.refresh_token_end_dt');
-        const user: LoginUserDataType = await builder.getRawOne();
+        const user: LoginUserDataType = await this.userLoginRepository.getLoginInfo(dto.refresh_token);
         if (!user) {
             return { statusCode: HttpStatus.UNAUTHORIZED, message: '올바르지 않은 인증정보입니다.' };
         } else if (user.login_able_yn === 'N') {

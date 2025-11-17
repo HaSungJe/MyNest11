@@ -10,7 +10,9 @@ import { User } from './entities/t_user.entity';
 import { State } from './entities/t_state.entity';
 import { Auth } from './entities/t_auth.entity';
 import { UserLogin } from './entities/t_user_login.entity';
-import { UserRepository } from './repositories/user.repository';
+import { UserRepository } from './user/repositories/user.repository';
+import { UserLoginRepository } from './user/repositories/user-login.repository';
+import { AdminUserRepository } from './admin/repositories/admin.user.repository';
 
 @SetMetadata('type', 'API')
 @SetMetadata('description', '회원')
@@ -25,7 +27,9 @@ import { UserRepository } from './repositories/user.repository';
     providers: [
         UserService,
         AdminUserService,
-        UserRepository
+        UserRepository,
+        UserLoginRepository,
+        AdminUserRepository
     ],
 })
 
