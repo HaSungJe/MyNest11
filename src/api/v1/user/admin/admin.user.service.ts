@@ -23,9 +23,9 @@ export class AdminUserService {
             const total_count: number = await this.adminUserRepository.count({where: {state_id: Not('DELETE')}});
 
             // 2. 목록, 페이징정보
-            const {list, pagenation} = await this.adminUserRepository.getUserList(dto);
+            const {list, pagination} = await this.adminUserRepository.getUserList(dto);
 
-            return { statusCode: HttpStatus.OK, list, total_count, pagenation };
+            return { statusCode: HttpStatus.OK, list, total_count, pagination };
         } catch (error) {
             return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
         }

@@ -24,7 +24,7 @@ describe('AdminUserController', () => {
 
   it('list - success', async () => {
     const dto: any = { page: 1, take: 10 };
-    const result = { statusCode: 200, list: [], total_count: 0, pagenation: { page: 1, take: 10, totalPage: 0 } } as any;
+    const result = { statusCode: 200, list: [], total_count: 0, pagination: { page: 1, take: 10, totalPage: 0 } } as any;
     (mockAdminUserService.list as any) = jest.fn().mockResolvedValue(result);
 
     const res = await controller.list(dto);

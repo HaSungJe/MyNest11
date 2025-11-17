@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ApiSuccessResultDto } from "@root/global.result.dto";
-import { PagenationDto, PagenationResultDto } from "@root/util/pagenation";
+import { PaginationDto, PaginationResultDto } from "@root/util/pagination";
 import { AdminUserListVO } from "../vo/list.vo";
 
 /**
  * 회원 목록 Dto
  */
-export class AdminUserListDto extends PagenationDto {
+export class AdminUserListDto extends PaginationDto {
     @ApiProperty({description: '검색 종류. (ALL: 전체, ID: 아이디, NAME: 이름, NICKNAME: 닉네임)', required: false})
     search_type: 'ALL' | 'ID' | 'NAME' | 'NICKNAME';
 
@@ -24,8 +24,8 @@ export class AdminUserListResultDto extends ApiSuccessResultDto {
     @ApiProperty({description: '총 개수', required: true})
     total_count: number;
 
-    @ApiProperty({description: '페이지 정보', required: true, type: () => PagenationResultDto})
-    pagenation: PagenationResultDto;
+    @ApiProperty({description: '페이지 정보', required: true, type: () => PaginationResultDto})
+    pagination: PaginationResultDto;
 
     @ApiProperty({description: '회원 목록', required: true, isArray: true, type: () => AdminUserListVO})
     list: Array<AdminUserListVO>;

@@ -3,7 +3,7 @@ import { DataSource, Repository } from 'typeorm';
 import { User } from '../../entities/t_user.entity';
 import { AdminUserListDto } from '../dto/list.dto';
 import { AdminUserListVO } from '../vo/list.vo';
-import { Pagenation, PagenationResultDto } from '@root/util/pagenation';
+import { Pagination, PaginationResultDto } from '@root/util/pagination';
 
 @Injectable()
 export class AdminUserRepository extends Repository<User> {
@@ -17,7 +17,7 @@ export class AdminUserRepository extends Repository<User> {
      * @param dto 
      * @returns 
      */
-    async getUserList(dto: AdminUserListDto): Promise<{list: Array<AdminUserListVO>, count: number, pagenation: PagenationResultDto}> {
+    async getUserList(dto: AdminUserListDto): Promise<{list: Array<AdminUserListVO>, count: number, pagination: PaginationResultDto}> {
         try {
             // 1. 개수
             const builder = this.createQueryBuilder('u');
@@ -42,7 +42,7 @@ export class AdminUserRepository extends Repository<User> {
             }
 
             // 2. 페이징
-            const pagenation = new Pagenation({totalCount: await builder.getCount(), ...dto});
+            const pagination = new Pagination({totalCount: await builder.getCount(), ...dto});
 
             // 3. 목록
             builder.select(`
@@ -57,11 +57,11 @@ export class AdminUserRepository extends Repository<User> {
                 , date_format(u.create_at, '%Y-%m-%d %H:%i') as create_at
             `);
             builder.orderBy('u.create_at', 'DESC');
-            builder.limit(pagenation.limit);
-            builder.offset(pagenation.offset);
+            builder.limit(pagination.limit);
+            builder.offset(pagination.offset);
             const list: Array<AdminUserListVO> = await builder.getRawMany<AdminUserListVO>();
 
-            return {list, count: await builder.getCount(), pagenation: pagenation.getPagenation()};
+            return {list, count: await builder.getCount(), pagination: pagination.getPagination()};
         } catch (error) {
             throw error;
         }
