@@ -12,11 +12,11 @@ export class User {
     @PrimaryColumn({name: 'user_id', length: 32, comment: '회원 ID', primaryKeyConstraintName: 'PK_User'})
     user_id: string;
 
-    @ManyToOne(() => State, state => state.state_id, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE'})
+    @ManyToOne(() => State, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE'})
     @JoinColumn({name: 'state_id', referencedColumnName: 'state_id', foreignKeyConstraintName: 'User_FK_State'})
     state_id: string;
 
-    @ManyToOne(() => Auth, auth => auth.auth_id, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE'})
+    @ManyToOne(() => Auth, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE'})
     @JoinColumn({name: 'auth_id', referencedColumnName: 'auth_id', foreignKeyConstraintName: 'User_FK_Auth'})
     auth_id: string;
 

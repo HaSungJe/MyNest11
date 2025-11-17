@@ -9,7 +9,7 @@ export class UserLogin {
     @PrimaryColumn({name: 'user_login_id', length: 32, comment: '회원 ID', primaryKeyConstraintName: 'PK_User'})
     user_login_id: string;
 
-    @ManyToOne(() => User, user => user.user_id, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+    @ManyToOne(() => User, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
     @JoinColumn({name: 'user_id', referencedColumnName: 'user_id', foreignKeyConstraintName: 'UserLogin_FK_User'})
     user_id: string;
 
