@@ -1,3 +1,6 @@
+import { FindManyOptions } from "typeorm";
+import { User } from "../../entities/t_user.entity";
+
 export type FindUserType = {
     user_id: string;
     login_id: string;
@@ -18,7 +21,7 @@ export interface UserRepositoryInterface {
      * @param option 
      * @returns 
      */
-    getCount(option: Record<string, any>): Promise<number>;
+    getCount(option: FindManyOptions<User>): Promise<number>;
 
     /**
      * 아이디로 회원정보 조회

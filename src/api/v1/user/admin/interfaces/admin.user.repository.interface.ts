@@ -1,6 +1,8 @@
 import { PaginationResultDto } from "@root/util/pagination";
 import { AdminUserListDto } from "../dto/list.dto";
 import { AdminUserListVO } from "../vo/list.vo";
+import { FindManyOptions } from "typeorm";
+import { User } from "../../entities/t_user.entity";
 
 export interface AdminUserRepositoryInterface {
     /**
@@ -9,7 +11,7 @@ export interface AdminUserRepositoryInterface {
      * @param option 
      * @returns 
      */
-    getCount(option: Record<string, any>): Promise<number>;
+    getCount(option: FindManyOptions<User>): Promise<number>;
 
     /**
      * 회원 목록

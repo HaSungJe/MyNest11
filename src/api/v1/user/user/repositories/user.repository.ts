@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { User } from '../../entities/t_user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindUserType, UserRepositoryInterface } from '../interfaces/user.repository.interface';
@@ -17,7 +17,7 @@ export class UserRepository implements UserRepositoryInterface {
      * @param option 
      * @returns 
      */
-    async getCount(option: Record<string, any>): Promise<number> {
+    async getCount(option: FindManyOptions<User>): Promise<number> {
         return this.repository.count(option);
     }
 

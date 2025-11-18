@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { User } from '../../entities/t_user.entity';
 import { AdminUserListDto } from '../dto/list.dto';
 import { AdminUserListVO } from '../vo/list.vo';
@@ -20,7 +20,7 @@ export class AdminUserRepository implements AdminUserRepositoryInterface {
      * @param option 
      * @returns 
      */
-    async getCount(option: Record<string, any>): Promise<number> {
+    async getCount(option: FindManyOptions<User>): Promise<number> {
         return this.repository.count(option);
     }
 
