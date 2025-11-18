@@ -1,5 +1,5 @@
 import type { AdminUserRepositoryInterface } from "./interfaces/admin.user.repository.interface";
-import { ADMIN_USER_REPOSITORY } from "../user/user.constants";
+import { ADMIN_USER_REPOSITORY } from "../user.constants";
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { DataSource, Not } from "typeorm";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
