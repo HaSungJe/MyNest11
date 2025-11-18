@@ -27,9 +27,18 @@ import { AdminUserRepository } from './admin/repositories/admin.user.repository'
     providers: [
         UserService,
         AdminUserService,
-        UserRepository,
-        UserLoginRepository,
-        AdminUserRepository
+        {
+            provide: 'UserRepositoryInterface',
+            useClass: UserRepository
+        },
+        {
+            provide: 'UserLoginRepositoryInterface',
+            useClass: UserLoginRepository
+        },
+        {
+            provide: 'AdminUserRepositoryInterface',
+            useClass: AdminUserRepository
+        }
     ],
 })
 

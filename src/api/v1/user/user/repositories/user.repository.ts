@@ -1,24 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../../entities/t_user.entity';
-
-export type FindUserType = {
-    user_id: string;
-    login_id: string;
-    login_pw: string;
-    name: string;
-    nickname: string;
-    auth_id: string;
-    auth_name: string;
-    state_id: string;
-    state_name: string;
-    login_able_yn: string;
-};
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindUserType, UserRepositoryInterface } from '../interfaces/user.repository.interface';
 
 @Injectable()
-export class UserRepository extends Repository<User> {
-    constructor(private readonly dataSource: DataSource) {
-        super(User, dataSource.createEntityManager());
+export class UserRepository implements UserRepositoryInterface {
+    constructor(
+        @InjectRepository(User)
+        private readonly repository: Repository<User>
+    ) {}
+
+    /**
+     * 회원 수
+     * 
+     * @param option 
+     * @returns 
+     */
+    async getCount(option: Record<string, any>): Promise<number> {
+        return this.repository.count(option);
     }
 
     /**
@@ -28,7 +28,7 @@ export class UserRepository extends Repository<User> {
      * @returns 
      */
     async findUserForLoginId(login_id: string): Promise<FindUserType | null> {
-        const builder = this.createQueryBuilder('u');
+        const builder = this.repository.createQueryBuilder('u');
         builder.select(`
               u.user_id 
             , u.login_id 

@@ -1,4 +1,6 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import type { FindUserType, UserRepositoryInterface } from './interfaces/user.repository.interface';
+import type { UserLoginRepositoryInterface } from './interfaces/user-login.repository.interface';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -9,8 +11,6 @@ import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
 import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
-import { FindUserType, UserRepository } from './repositories/user.repository';
-import { UserLoginRepository } from './repositories/user-login.repository';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
 
@@ -19,8 +19,10 @@ export class UserService {
     constructor(
         private readonly dataSource: DataSource,
         private readonly jwtService: JwtService,
-        private readonly userRepository: UserRepository,
-        private readonly userLoginRepository: UserLoginRepository,
+        @Inject('UserRepositoryInterface')
+        private readonly userRepository: UserRepositoryInterface,
+        @Inject('UserLoginRepositoryInterface')
+        private readonly userLoginRepository: UserLoginRepositoryInterface,
     ) {}
 
     /**
@@ -224,7 +226,7 @@ export class UserService {
      * @returns 
      */
     async checkLoginId(dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
-        const count = await this.userRepository.count({ where: { login_id: dto.login_id } });
+        const count = await this.userRepository.getCount({ where: { login_id: dto.login_id } });
         if (count === 0) {
             return { statusCode: HttpStatus.OK };
         } else {
@@ -240,7 +242,7 @@ export class UserService {
      * @returns 
      */
     async checkNickname(dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
-        const count = await this.userRepository.count({ where: { nickname: dto.nickname } });
+        const count = await this.userRepository.getCount({ where: { nickname: dto.nickname } });
         if (count === 0) {
             return { statusCode: HttpStatus.OK };
         } else {

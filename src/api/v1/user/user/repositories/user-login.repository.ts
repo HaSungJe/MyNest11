@@ -1,21 +1,15 @@
-import { DataSource, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { UserLogin } from "../../entities/t_user_login.entity";
 import { Injectable } from "@nestjs/common";
-
-export type LoginUserDataType = {
-    user_id: string;
-    user_login_id: string;
-    access_token: string;
-    refresh_token: string;
-    auth_id: string;
-    login_able_yn: string;
-}
+import { InjectRepository } from "@nestjs/typeorm";
+import { LoginUserDataType, UserLoginRepositoryInterface } from "../interfaces/user-login.repository.interface";
 
 @Injectable()
-export class UserLoginRepository extends Repository<UserLogin> {
-    constructor(private readonly dataSource: DataSource) {
-        super(UserLogin, dataSource.createEntityManager());
-    }
+export class UserLoginRepository implements UserLoginRepositoryInterface {
+    constructor(
+        @InjectRepository(UserLogin)
+        private readonly repository: Repository<UserLogin>
+    ) {}
 
     /**
      * 로그인 정보 확인
@@ -24,7 +18,7 @@ export class UserLoginRepository extends Repository<UserLogin> {
      * @returns 
      */
     async getLoginInfo(refresh_token: string): Promise<LoginUserDataType | null> {
-        const builder = this.createQueryBuilder('l');
+        const builder = this.repository.createQueryBuilder('l');
         builder.select(`
               l.user_id
             , l.user_login_id 

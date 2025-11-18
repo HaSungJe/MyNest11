@@ -1,14 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../../entities/t_user.entity';
 import { AdminUserListDto } from '../dto/list.dto';
 import { AdminUserListVO } from '../vo/list.vo';
 import { Pagination, PaginationResultDto } from '@root/util/pagination';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AdminUserRepositoryInterface } from '../interfaces/admin.user.repository.interface';
 
 @Injectable()
-export class AdminUserRepository extends Repository<User> {
-    constructor(private readonly dataSource: DataSource) {
-        super(User, dataSource.createEntityManager());
+export class AdminUserRepository implements AdminUserRepositoryInterface {
+    constructor(
+        @InjectRepository(User)
+        private readonly repository: Repository<User>
+    ) {}
+
+    /**
+     * 회원 수
+     * 
+     * @param option 
+     * @returns 
+     */
+    async getCount(option: Record<string, any>): Promise<number> {
+        return this.repository.count(option);
     }
 
     /**
@@ -20,7 +33,7 @@ export class AdminUserRepository extends Repository<User> {
     async getUserList(dto: AdminUserListDto): Promise<{list: Array<AdminUserListVO>, count: number, pagination: PaginationResultDto}> {
         try {
             // 1. 개수
-            const builder = this.createQueryBuilder('u');
+            const builder = this.repository.createQueryBuilder('u');
             builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
             builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
             builder.where('s.state_id != :state_id', {state_id: 'DELETE'});
@@ -41,8 +54,10 @@ export class AdminUserRepository extends Repository<User> {
                 }
             }
 
+            const count = await builder.getCount();
+
             // 2. 페이징
-            const pagination = new Pagination({totalCount: await builder.getCount(), ...dto});
+            const pagination = new Pagination({totalCount: count, ...dto});
 
             // 3. 목록
             builder.select(`
@@ -61,7 +76,7 @@ export class AdminUserRepository extends Repository<User> {
             builder.offset(pagination.offset);
             const list: Array<AdminUserListVO> = await builder.getRawMany<AdminUserListVO>();
 
-            return {list, count: await builder.getCount(), pagination: pagination.getPagination()};
+            return {list, count, pagination: pagination.getPagination()};
         } catch (error) {
             throw error;
         }

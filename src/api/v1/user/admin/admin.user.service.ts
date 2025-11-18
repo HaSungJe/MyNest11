@@ -1,14 +1,15 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import type { AdminUserRepositoryInterface } from "./interfaces/admin.user.repository.interface";
+import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { DataSource, Not } from "typeorm";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
 import { ApiFailResultDto } from "@root/global.result.dto";
-import { AdminUserRepository } from "./repositories/admin.user.repository";
 
 @Injectable()
 export class AdminUserService {
     constructor(
         private readonly dataSource: DataSource,
-        private readonly adminUserRepository: AdminUserRepository
+        @Inject('AdminUserRepositoryInterface')
+        private readonly adminUserRepository: AdminUserRepositoryInterface
     ) {}
 
     /**
@@ -20,7 +21,7 @@ export class AdminUserService {
     async list(dto: AdminUserListDto): Promise<AdminUserListResultDto | ApiFailResultDto> {
         try {
             // 1. 총 개수
-            const total_count: number = await this.adminUserRepository.count({where: {state_id: Not('DELETE')}});
+            const total_count: number = await this.adminUserRepository.getCount({where: {state_id: Not('DELETE')}});
 
             // 2. 목록, 페이징정보
             const {list, pagination} = await this.adminUserRepository.getUserList(dto);
