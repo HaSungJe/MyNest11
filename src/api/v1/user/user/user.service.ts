@@ -1,5 +1,6 @@
 import type { FindUserType, UserRepositoryInterface } from './interfaces/user.repository.interface';
 import type { UserLoginRepositoryInterface } from './interfaces/user-login.repository.interface';
+import { USER_REPOSITORY, USER_LOGIN_REPOSITORY } from './user.constants';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
@@ -19,9 +20,9 @@ export class UserService {
     constructor(
         private readonly dataSource: DataSource,
         private readonly jwtService: JwtService,
-        @Inject('UserRepositoryInterface')
+        @Inject(USER_REPOSITORY)
         private readonly userRepository: UserRepositoryInterface,
-        @Inject('UserLoginRepositoryInterface')
+        @Inject(USER_LOGIN_REPOSITORY)
         private readonly userLoginRepository: UserLoginRepositoryInterface,
     ) {}
 

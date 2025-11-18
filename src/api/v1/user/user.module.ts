@@ -13,6 +13,7 @@ import { UserLogin } from './entities/t_user_login.entity';
 import { UserRepository } from './user/repositories/user.repository';
 import { UserLoginRepository } from './user/repositories/user-login.repository';
 import { AdminUserRepository } from './admin/repositories/admin.user.repository';
+import { USER_REPOSITORY, USER_LOGIN_REPOSITORY, ADMIN_USER_REPOSITORY } from './user/user.constants';
 
 @SetMetadata('type', 'API')
 @SetMetadata('description', '회원')
@@ -28,15 +29,15 @@ import { AdminUserRepository } from './admin/repositories/admin.user.repository'
         UserService,
         AdminUserService,
         {
-            provide: 'UserRepositoryInterface',
+            provide: USER_REPOSITORY,
             useClass: UserRepository
         },
         {
-            provide: 'UserLoginRepositoryInterface',
+            provide: USER_LOGIN_REPOSITORY,
             useClass: UserLoginRepository
         },
         {
-            provide: 'AdminUserRepositoryInterface',
+            provide: ADMIN_USER_REPOSITORY,
             useClass: AdminUserRepository
         }
     ],
