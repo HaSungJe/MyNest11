@@ -1,6 +1,6 @@
 import type { FindUserType, UserRepositoryInterface } from './interfaces/user.repository.interface';
 import type { UserLoginRepositoryInterface } from './interfaces/user-login.repository.interface';
-import { USER_REPOSITORY, USER_LOGIN_REPOSITORY } from '../user.constants';
+import { USER_REPOSITORY, USER_LOGIN_REPOSITORY } from '../user.symbols';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoginDto, LoginResultDto } from './dto/login.dto';

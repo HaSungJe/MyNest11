@@ -1,3 +1,4 @@
+import { USER_REPOSITORY, USER_LOGIN_REPOSITORY, ADMIN_USER_REPOSITORY } from './user.symbols';
 import { Module, SetMetadata } from '@nestjs/common';
 import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
@@ -13,7 +14,6 @@ import { UserLogin } from './entities/t_user_login.entity';
 import { UserRepository } from './user/repositories/user.repository';
 import { UserLoginRepository } from './user/repositories/user-login.repository';
 import { AdminUserRepository } from './admin/repositories/admin.user.repository';
-import { USER_REPOSITORY, USER_LOGIN_REPOSITORY, ADMIN_USER_REPOSITORY } from './user.constants';
 
 @SetMetadata('type', 'API')
 @SetMetadata('description', '회원')
