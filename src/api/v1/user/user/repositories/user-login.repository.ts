@@ -35,4 +35,30 @@ export class UserLoginRepository implements UserLoginRepositoryInterface {
         builder.andWhere('now() < l.refresh_token_end_dt');
         return await builder.getRawOne<LoginUserDataType>();
     }
+
+    /**
+     * 로그인 
+     * 
+     * @param login 
+     */
+    async login(login: UserLogin): Promise<void> {
+        try {
+            await this.repository.insert(login);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
+     * 로그인키 재발급
+     * 
+     * @param login 
+     */
+    async refresh(login: UserLogin): Promise<void> {
+        try {
+            await this.repository.update(login.user_login_id, login);
+        } catch (error) {
+            throw error;
+        }
+    }
 }

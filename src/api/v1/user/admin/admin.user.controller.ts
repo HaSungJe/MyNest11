@@ -28,11 +28,10 @@ export class AdminUserController {
     @ApiOkResponse({type: AdminUserListResultDto})
     @ApiInternalServerErrorResponse({type: ApiFailResultDto})
     async list(@Query() dto: AdminUserListDto): Promise<AdminUserListResultDto | ApiFailResultDto> {
-        const result = await this.service.list(dto);
-        if (result.statusCode === HttpStatus.OK) {
-            return result;
-        } else {
-            throw new HttpException(result, result?.statusCode);
+        try {
+            return await this.service.list(dto);
+        } catch (error) {
+            throw error;
         }
     }
 }

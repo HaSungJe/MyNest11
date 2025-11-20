@@ -1,6 +1,6 @@
 import type { AdminUserRepositoryInterface } from "./interfaces/admin.user.repository.interface";
 import { ADMIN_USER_REPOSITORY } from "../user.symbols";
-import { HttpStatus, Inject, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { DataSource, Not } from "typeorm";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
 import { ApiFailResultDto } from "@root/global.result.dto";
@@ -29,7 +29,7 @@ export class AdminUserService {
 
             return { statusCode: HttpStatus.OK, list, total_count, pagination };
         } catch (error) {
-            return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
+            throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

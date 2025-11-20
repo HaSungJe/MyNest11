@@ -1,3 +1,5 @@
+import { UserLogin } from "../../entities/t_user_login.entity";
+
 export type LoginUserDataType = {
     user_id: string;
     user_login_id: string;
@@ -14,4 +16,18 @@ export interface UserLoginRepositoryInterface {
      * @param refresh_token 
      */
     getLoginInfo(refresh_token: string): Promise<LoginUserDataType | null>;
+
+    /**
+     * 로그인 이력 저장
+     * 
+     * @param login 
+     */
+    login(login: UserLogin): Promise<void>;
+
+    /**
+     * 로그인키 재발급
+     * 
+     * @param login 
+     */
+    refresh(login: UserLogin): Promise<void>;
 }

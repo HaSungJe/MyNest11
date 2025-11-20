@@ -1,5 +1,6 @@
 import { FindManyOptions } from "typeorm";
 import { User } from "../../entities/t_user.entity";
+import { ApiSuccessResultDto, ApiBadRequestResultDto, ApiFailResultDto } from "@root/global.result.dto";
 
 export type FindUserType = {
     user_id: string;
@@ -29,4 +30,19 @@ export interface UserRepositoryInterface {
      * @param login_id 
      */
     findUserForLoginId(login_id: string): Promise<FindUserType | null>;
+
+    /**
+     * 회원가입
+     * 
+     * @param dto 
+     * @returns 
+     */
+    sign(user: User): Promise<void>;
+
+    /**
+     * 회원탈퇴
+     * 
+     * @param user_id
+     */
+    leave(user_id: string): Promise<void>;
 }

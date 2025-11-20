@@ -1,3 +1,4 @@
+import { addTransactionalDataSource, initializeTransactionalContext } from 'typeorm-transactional';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { CustomErrorFilter } from './exception/exception';
@@ -8,8 +9,12 @@ import { ApiBadRequestResultDto, ValidationErrorDto } from './global.result.dto'
 import dayjs from 'dayjs';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
+import { DataSource } from 'typeorm';
 
 async function bootstrap() {
+    // 트렌젝션 컨텍스트 초기화
+    initializeTransactionalContext();
+
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
     // JSON Parser의 크기 제한 설정
@@ -144,6 +149,10 @@ async function bootstrap() {
             }
         }),
     );
+
+    // DataSource를 가져와서 트랜잭션 지원 추가
+    const dataSource = app.get(DataSource);
+    addTransactionalDataSource(dataSource);
 
     await app.listen(process.env.SERVER_PORT || 3000);
 }

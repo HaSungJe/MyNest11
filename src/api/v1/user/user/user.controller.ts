@@ -34,11 +34,10 @@ export class UserController {
     @ApiInternalServerErrorResponse({type: ApiFailResultDto})
     async login(@Headers('user-agent') agent: string, @Ip() ip: string, @Body() dto: LoginDto): Promise<LoginResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         dto = new LoginDto({...dto, agent, ip});
-        const result = await this.service.login(dto);
-        if (result.statusCode === HttpStatus.OK) {
-            return result;
-        } else {
-            throw new HttpException(result, result?.statusCode);
+        try {
+            return await this.service.login(dto);
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -56,11 +55,10 @@ export class UserController {
     @ApiForbiddenResponse({type: ApiFailResultDto})
     @ApiInternalServerErrorResponse({type: ApiFailResultDto})
     async refresh(@Body() dto: RefreshDto): Promise<RefreshResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
-        const result = await this.service.refresh(dto);
-        if (result.statusCode === HttpStatus.OK) {
-            return result;
-        } else {
-            throw new HttpException(result, result?.statusCode);
+        try {
+            return await this.service.refresh(dto);
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -76,8 +74,7 @@ export class UserController {
     @ApiOkResponse({type: PassportUserSuccessResultDto})
     @ApiUnauthorizedResponse({type: ApiFailResultDto})
     async info(@Req() req: any): Promise<PassportUserSuccessResultDto | ApiFailResultDto> {
-        const info: PassportUserResultDto = req.user;
-        return { statusCode: HttpStatus.OK, info };
+        return { statusCode: HttpStatus.OK, info: req.user };
     }
 
     /**
@@ -92,11 +89,10 @@ export class UserController {
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
     @ApiInternalServerErrorResponse({type: ApiFailResultDto})
     async sign(@Body() dto: SignDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
-        const result = await this.service.sign(dto);
-        if (result.statusCode === HttpStatus.OK) {
-            return result;
-        } else {
-            throw new HttpException(result, result?.statusCode);
+        try {
+            return await this.service.sign(dto);
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -111,13 +107,12 @@ export class UserController {
     @ApiOkResponse({type: ApiSuccessResultDto})
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
     async checkLoginId(@Body() dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
-        const result = await this.service.checkLoginId(dto);
-        if (result.statusCode === HttpStatus.OK) {
-            return result;
-        } else {
-            throw new HttpException(result, result?.statusCode);
+        try {
+            return await this.service.checkLoginId(dto);
+        } catch (error) {
+            throw error;
         }
-    }     
+    }
 
     /**
      * 닉네임 중복 확인
@@ -130,11 +125,10 @@ export class UserController {
     @ApiOkResponse({type: ApiSuccessResultDto})
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
     async checkNickname(@Body() dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
-        const result = await this.service.checkNickname(dto);
-        if (result.statusCode === HttpStatus.OK) {
-            return result;
-        } else {
-            throw new HttpException(result, result?.statusCode);
+        try {
+            return await this.service.checkNickname(dto);
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -152,11 +146,10 @@ export class UserController {
     @ApiForbiddenResponse({type: ApiFailResultDto})
     @ApiInternalServerErrorResponse({type: ApiFailResultDto})
     async leave(@Req() req: any): Promise<ApiSuccessResultDto | ApiFailResultDto> {
-        const result = await this.service.leave(req.user.id);
-        if (result.statusCode === HttpStatus.OK) {
-            return result;
-        } else {
-            throw new HttpException(result, result?.statusCode);
+        try {
+            return await this.service.leave(req.user.id);
+        } catch (error) {
+            throw error;
         }
     }
 }

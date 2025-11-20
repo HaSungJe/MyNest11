@@ -46,4 +46,31 @@ export class UserRepository implements UserRepositoryInterface {
         builder.where('u.login_id = :login_id', {login_id});
         return builder.getRawOne<FindUserType>();
     }
+
+    /**
+     * 회원가입
+     * 
+     * @param dto 
+     * @returns 
+     */
+    async sign(user: User): Promise<void> {
+        try {
+            await this.repository.insert(user);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
+     * 회원탈퇴
+     * 
+     * @param user_id
+     */
+    async leave(user_id: string): Promise<void> {
+        try {
+            await this.repository.update(user_id, {state_id: 'LEAVE'});
+        } catch (error) {
+            throw error;
+        }
+    }
 }

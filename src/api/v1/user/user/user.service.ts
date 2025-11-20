@@ -1,7 +1,8 @@
 import type { FindUserType, UserRepositoryInterface } from './interfaces/user.repository.interface';
 import type { UserLoginRepositoryInterface } from './interfaces/user-login.repository.interface';
 import { USER_REPOSITORY, USER_LOGIN_REPOSITORY } from '../user.symbols';
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Transactional } from 'typeorm-transactional';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -32,6 +33,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
+    @Transactional()
     async login(dto: LoginDto): Promise<LoginResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         // 1. 아이디/비밀번호 확인
         const user: FindUserType = await this.userRepository.findUserForLoginId(dto.login_id);
@@ -86,12 +88,8 @@ export class UserService {
         login.fcm_token = dto.fcm_token;
 
         // 3. 로그인
-        const conn = this.dataSource.createQueryRunner();
-        await conn.startTransaction();
-
         try {
-            await conn.manager.insert(UserLogin, login);
-            await conn.commitTransaction();
+            await this.userLoginRepository.login(login);
             return { 
                 statusCode: HttpStatus.OK, 
                 refresh_token: refreshToken, 
@@ -100,10 +98,7 @@ export class UserService {
                 access_token_end_dt: accessTokenEXP 
             }
         } catch (error) {
-            await conn.rollbackTransaction();
-            return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
-        } finally {
-            await conn.release();
+            throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -113,6 +108,7 @@ export class UserService {
      * @param dto 
      * @returns 
      */
+    @Transactional()
     async refresh(dto: RefreshDto): Promise<RefreshResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
         type LoginUserDataType = {
             user_id: string;
@@ -151,21 +147,17 @@ export class UserService {
         const accessTokenIAT = new Date(accessTokenDecode['iat'] * 1000);
         const accessTokenEXP = new Date(accessTokenDecode['exp'] * 1000);
 
-        // 3. 로그인 이력 수정
-        const conn = this.dataSource.createQueryRunner();
-        await conn.startTransaction();
+        // 3. 로그인키 재발급
+        const login = new UserLogin();
+        login.access_token = accessToken;
+        login.access_token_start_dt = accessTokenIAT;
+        login.access_token_end_dt = accessTokenEXP;
+        login.refresh_token = refreshToken;
+        login.refresh_token_start_dt = refreshTokenIAT;
+        login.refresh_token_end_dt = refreshTokenEXP;
 
         try {
-            await conn.manager.update(UserLogin, user.user_login_id, {
-                access_token: accessToken,
-                access_token_start_dt: accessTokenIAT,
-                access_token_end_dt: accessTokenEXP,
-                refresh_token: refreshToken,
-                refresh_token_start_dt: refreshTokenIAT,
-                refresh_token_end_dt: refreshTokenEXP
-            });
-
-            await conn.commitTransaction();
+            await this.userLoginRepository.refresh(login);
             return { 
                 statusCode: HttpStatus.OK, 
                 refresh_token: refreshToken, 
@@ -174,11 +166,8 @@ export class UserService {
                 access_token_end_dt: accessTokenEXP 
             }
         } catch (error) {
-            await conn.rollbackTransaction();
-            return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' }
-        } finally {
-            await conn.release();
-        }   
+            throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -187,10 +176,8 @@ export class UserService {
      * @param dto 
      * @returns 
      */
+    @Transactional()
     async sign(dto: SignDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
-        const conn = this.dataSource.createQueryRunner();
-        await conn.startTransaction();
-
         try {
             const user = new User();
             user.user_id = UUID().replaceAll('-', '');
@@ -200,23 +187,27 @@ export class UserService {
             user.nickname = dto.nickname;
             user.auth_id = 'USER';
             user.state_id = 'DONE';
-            await conn.manager.insert(User, user);
+            await this.userRepository.sign(user);
 
-            await conn.commitTransaction();
             return { statusCode: HttpStatus.OK };
         } catch (error) {
-            await conn.rollbackTransaction();
+            const resultError: Record<string, any> = {};
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
                 const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
-                return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError };
+                resultError.message = '이미 사용중인 닉네임입니다.';
+                resultError.statusCode = HttpStatus.BAD_REQUEST;
+                resultError.validationError = validationError;
             } else if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_loginId') !== -1) {
                 const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
-                return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError };
+                resultError.message = '이미 사용중인 아이디입니다.';
+                resultError.statusCode = HttpStatus.BAD_REQUEST;
+                resultError.validationError = validationError;
             } else {
-                return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
+                resultError.message = '요청이 실패했습니다. 관리자에게 문의해주세요.';
+                resultError.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
             }
-        } finally {
-            await conn.release();
+
+            throw new HttpException(resultError, resultError.statusCode)
         }
     }
 
@@ -232,7 +223,7 @@ export class UserService {
             return { statusCode: HttpStatus.OK };
         } else {
             const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
-            return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError };
+            throw new HttpException({statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError}, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -248,29 +239,23 @@ export class UserService {
             return { statusCode: HttpStatus.OK };
         } else {
             const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
-            return { statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError };
+            throw new HttpException({statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError}, HttpStatus.BAD_REQUEST);
         } 
     }
 
     /**
-     * 회원 탈퇴
+     * 회원탈퇴
      * 
      * @param user_id 
      * @returns 
      */
+    @Transactional()
     async leave(user_id: string): Promise<ApiSuccessResultDto | ApiFailResultDto> {
-        const conn = this.dataSource.createQueryRunner();
-        await conn.startTransaction();
-
         try {
-            await conn.manager.update(User, user_id, { state_id: 'LEAVE' });
-            await conn.commitTransaction();
+            await this.userRepository.leave(user_id);
             return { statusCode: HttpStatus.OK };
         } catch (error) {
-            await conn.rollbackTransaction();
-            return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.' };
-        } finally {
-            await conn.release();
+            throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
