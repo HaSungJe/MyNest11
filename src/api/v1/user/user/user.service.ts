@@ -3,7 +3,6 @@ import type { UserLoginRepositoryInterface } from './interfaces/user-login.repos
 import { USER_REPOSITORY, USER_LOGIN_REPOSITORY } from '../user.symbols';
 import { Transactional } from 'typeorm-transactional';
 import { ForbiddenException, HttpException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserLogin } from '../entities/t_user_login.entity';
@@ -19,7 +18,6 @@ import * as util from '@util/util';
 @Injectable()
 export class UserService {
     constructor(
-        private readonly dataSource: DataSource,
         private readonly jwtService: JwtService,
         @Inject(USER_REPOSITORY)
         private readonly userRepository: UserRepositoryInterface,

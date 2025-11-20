@@ -1,14 +1,13 @@
 import type { AdminUserRepositoryInterface } from "./interfaces/admin.user.repository.interface";
 import { ADMIN_USER_REPOSITORY } from "../user.symbols";
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
-import { DataSource, Not } from "typeorm";
+import { Not } from "typeorm";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
 import { ApiFailResultDto } from "@root/global.result.dto";
 
 @Injectable()
 export class AdminUserService {
     constructor(
-        private readonly dataSource: DataSource,
         @Inject(ADMIN_USER_REPOSITORY)
         private readonly adminUserRepository: AdminUserRepositoryInterface
     ) {}
