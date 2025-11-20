@@ -1,4 +1,4 @@
-import { HttpStatus } from "@nestjs/common";
+import { HttpException, HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 
 /**
@@ -16,20 +16,9 @@ export class ValidationErrorDto {
 }
 
 /**
- * API 요청 성공 반환 ResultDto
- */
-export class ApiSuccessResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.OK})
-    statusCode: HttpStatus.OK;
-}
-
-/**
  * API 요청 실패 반환 - 400
  */
-export class ApiBadRequestResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true, example: HttpStatus.BAD_REQUEST})
-    statusCode: HttpStatus.BAD_REQUEST;
-
+export class ApiBadRequestResultDto extends HttpException {
     @ApiProperty({description: '메세지', required: true})
     message: string;
 
@@ -40,10 +29,7 @@ export class ApiBadRequestResultDto {
 /**
  * API 요청 실패 반환 - 401, 403, 500, 502
  */
-export class ApiFailResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true, example: '401, 403, 500, 502'})
-    statusCode: HttpStatus.UNAUTHORIZED | HttpStatus.FORBIDDEN | HttpStatus.INTERNAL_SERVER_ERROR | HttpStatus.BAD_GATEWAY;
-
+export class ApiFailResultDto extends HttpException {
     @ApiProperty({description: '메세지', required: true})
     message: string;
 }

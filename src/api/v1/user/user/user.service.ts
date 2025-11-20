@@ -2,7 +2,7 @@ import type { FindUserType, UserRepositoryInterface } from './interfaces/user.re
 import type { UserLoginRepositoryInterface } from './interfaces/user-login.repository.interface';
 import { USER_REPOSITORY, USER_LOGIN_REPOSITORY } from '../user.symbols';
 import { Transactional } from 'typeorm-transactional';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -11,7 +11,7 @@ import { SignDto } from './dto/sign.dto';
 import { User } from '../entities/t_user.entity';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/global.result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
@@ -40,12 +40,12 @@ export class UserService {
         if (user) {
             const match = await util.matchBcrypt(dto.login_pw, user.login_pw);
             if (!match) {
-                return { statusCode: HttpStatus.UNAUTHORIZED, message: '아이디 또는 비밀번호가 잘못되었습니다.' }
+                throw new UnauthorizedException({message: '아이디 또는 비밀번호가 잘못되었습니다.'});
             } else if (user.login_able_yn === 'N') {
-                return { statusCode: HttpStatus.FORBIDDEN, message: '사용이 정지된 계정입니다. 관리자에게 문의해주세요.' }
+                throw new ForbiddenException({message: '사용이 정지된 계정입니다. 관리자에게 문의해주세요.'});
             }
         } else {
-            return { statusCode: HttpStatus.UNAUTHORIZED, message: '아이디 또는 비밀번호가 잘못되었습니다.' }
+            throw new UnauthorizedException({message: '아이디 또는 비밀번호가 잘못되었습니다.'});
         }
 
         // 2-1. Refresh Token 생성
@@ -91,7 +91,6 @@ export class UserService {
         try {
             await this.userLoginRepository.login(login);
             return { 
-                statusCode: HttpStatus.OK, 
                 refresh_token: refreshToken, 
                 access_token: accessToken, 
                 refresh_token_end_dt: refreshTokenEXP, 
@@ -122,9 +121,9 @@ export class UserService {
         // 1. 로그인 정보 확인
         const user: LoginUserDataType = await this.userLoginRepository.getLoginInfo(dto.refresh_token);
         if (!user) {
-            return { statusCode: HttpStatus.UNAUTHORIZED, message: '올바르지 않은 인증정보입니다.' };
+            throw new UnauthorizedException({message: '올바르지 않은 인증정보입니다.'});
         } else if (user.login_able_yn === 'N') {
-            return { statusCode: HttpStatus.FORBIDDEN, message: '사용이 정지된 계정입니다. 관리자에게 문의해주세요.' }
+            throw new ForbiddenException({message: '사용이 정지된 계정입니다. 관리자에게 문의해주세요.'});
         }
 
         // 2-1. Refresh Token 생성
@@ -159,7 +158,6 @@ export class UserService {
         try {
             await this.userLoginRepository.refresh(login);
             return { 
-                statusCode: HttpStatus.OK, 
                 refresh_token: refreshToken, 
                 access_token: accessToken, 
                 refresh_token_end_dt: refreshTokenEXP, 
@@ -177,7 +175,7 @@ export class UserService {
      * @returns 
      */
     @Transactional()
-    async sign(dto: SignDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
+    async sign(dto: SignDto): Promise<void | ApiBadRequestResultDto | ApiFailResultDto> {
         try {
             const user = new User();
             user.user_id = UUID().replaceAll('-', '');
@@ -188,8 +186,6 @@ export class UserService {
             user.auth_id = 'USER';
             user.state_id = 'DONE';
             await this.userRepository.sign(user);
-
-            return { statusCode: HttpStatus.OK };
         } catch (error) {
             const resultError: Record<string, any> = {};
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
@@ -217,11 +213,9 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async checkLoginId(dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
+    async checkLoginId(dto: CheckLoginIdDto): Promise<void | ApiBadRequestResultDto> {
         const count = await this.userRepository.getCount({ where: { login_id: dto.login_id } });
-        if (count === 0) {
-            return { statusCode: HttpStatus.OK };
-        } else {
+        if (count > 0) {
             const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
             throw new HttpException({statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 아이디입니다.', validationError}, HttpStatus.BAD_REQUEST);
         }
@@ -233,14 +227,12 @@ export class UserService {
      * @param dto 
      * @returns 
      */
-    async checkNickname(dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
+    async checkNickname(dto: CheckNicknameDto): Promise<void | ApiBadRequestResultDto> {
         const count = await this.userRepository.getCount({ where: { nickname: dto.nickname } });
-        if (count === 0) {
-            return { statusCode: HttpStatus.OK };
-        } else {
+        if (count > 0) {
             const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
             throw new HttpException({statusCode: HttpStatus.BAD_REQUEST, message: '이미 사용중인 닉네임입니다.', validationError}, HttpStatus.BAD_REQUEST);
-        } 
+        }
     }
 
     /**
@@ -250,10 +242,9 @@ export class UserService {
      * @returns 
      */
     @Transactional()
-    async leave(user_id: string): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+    async leave(user_id: string): Promise<void | ApiFailResultDto> {
         try {
             await this.userRepository.leave(user_id);
-            return { statusCode: HttpStatus.OK };
         } catch (error) {
             throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -120,7 +120,7 @@ async function bootstrap() {
             transform: true,
             forbidNonWhitelisted: true,
             exceptionFactory: (errors) => {
-                const result = new ApiBadRequestResultDto();
+                const result: Record<string, any> = {};
                 result.validationError = [];
 
                 for (let i=0; i<errors.length; i++) {

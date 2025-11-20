@@ -1,13 +1,13 @@
-import { Body, Controller, Delete, Get, Headers, HttpException, HttpStatus, Ip, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpStatus, Ip, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { PassportJwtAuthGuard } from '@root/guards/passport.jwt.auth/passport.jwt.auth.guard';
-import { PassportUserResultDto, PassportUserSuccessResultDto } from '@root/guards/passport.jwt.auth/passport.jwt.auth.dto';
+import { PassportUserSuccessResultDto } from '@root/guards/passport.jwt.auth/passport.jwt.auth.dto';
 import { SignDto } from './dto/sign.dto';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiBadRequestResultDto, ApiFailResultDto, ApiSuccessResultDto } from '@root/global.result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 
 @ApiTags('회원')
@@ -85,12 +85,12 @@ export class UserController {
      */
     @Put('/sign')
     @ApiOperation({summary: '회원가입'})
-    @ApiOkResponse({type: ApiSuccessResultDto})
+    @ApiNoContentResponse()
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
     @ApiInternalServerErrorResponse({type: ApiFailResultDto})
-    async sign(@Body() dto: SignDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto | ApiFailResultDto> {
+    async sign(@Body() dto: SignDto): Promise<void | ApiBadRequestResultDto | ApiFailResultDto> {
         try {
-            return await this.service.sign(dto);
+            await this.service.sign(dto);
         } catch (error) {
             throw error;
         }
@@ -104,11 +104,11 @@ export class UserController {
      */
     @Post('/check/id')
     @ApiOperation({summary: '아이디 중복 확인'})
-    @ApiOkResponse({type: ApiSuccessResultDto})
+    @ApiNoContentResponse()
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
-    async checkLoginId(@Body() dto: CheckLoginIdDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
+    async checkLoginId(@Body() dto: CheckLoginIdDto): Promise<void | ApiBadRequestResultDto> {
         try {
-            return await this.service.checkLoginId(dto);
+            await this.service.checkLoginId(dto);
         } catch (error) {
             throw error;
         }
@@ -122,11 +122,11 @@ export class UserController {
      */
     @Post('/check/nickname')
     @ApiOperation({summary: '닉네임 중복 확인'})
-    @ApiOkResponse({type: ApiSuccessResultDto})
+    @ApiNoContentResponse()
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
-    async checkNickname(@Body() dto: CheckNicknameDto): Promise<ApiSuccessResultDto | ApiBadRequestResultDto> {
+    async checkNickname(@Body() dto: CheckNicknameDto): Promise<void | ApiBadRequestResultDto> {
         try {
-            return await this.service.checkNickname(dto);
+            await this.service.checkNickname(dto);
         } catch (error) {
             throw error;
         }
@@ -141,13 +141,13 @@ export class UserController {
     @Delete('/leave')
     @ApiOperation({summary: '회원탈퇴'})
     @UseGuards(PassportJwtAuthGuard)
-    @ApiOkResponse({type: ApiSuccessResultDto})
+    @ApiNoContentResponse()
     @ApiUnauthorizedResponse({type: ApiFailResultDto})
     @ApiForbiddenResponse({type: ApiFailResultDto})
     @ApiInternalServerErrorResponse({type: ApiFailResultDto})
-    async leave(@Req() req: any): Promise<ApiSuccessResultDto | ApiFailResultDto> {
+    async leave(@Req() req: any): Promise<void | ApiFailResultDto> {
         try {
-            return await this.service.leave(req.user.id);
+            await this.service.leave(req.user.id);
         } catch (error) {
             throw error;
         }

@@ -1,6 +1,5 @@
 import { FindManyOptions } from "typeorm";
 import { User } from "../../entities/t_user.entity";
-import { ApiSuccessResultDto, ApiBadRequestResultDto, ApiFailResultDto } from "@root/global.result.dto";
 
 export type FindUserType = {
     user_id: string;

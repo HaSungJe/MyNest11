@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ApiSuccessResultDto } from "@root/global.result.dto";
 import { PaginationDto, PaginationResultDto } from "@root/util/pagination";
 import { AdminUserListVO } from "../vo/list.vo";
 
@@ -20,7 +19,7 @@ export class AdminUserListDto extends PaginationDto {
 /**
  * 회원 목록 반환 Dto
  */
-export class AdminUserListResultDto extends ApiSuccessResultDto {
+export class AdminUserListResultDto {
     @ApiProperty({description: '총 개수', required: true})
     total_count: number;
 

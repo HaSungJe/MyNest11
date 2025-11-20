@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ApiSuccessResultDto } from "@root/global.result.dto";
 import { IsNotEmpty } from "class-validator";
 
 /**
@@ -72,7 +71,7 @@ export class LoginDto {
 /**
  *  로그인 성공 반환 ResultDto
  */
-export class LoginResultDto extends ApiSuccessResultDto {
+export class LoginResultDto {
     @ApiProperty({description: '로그인 RefreshToken', required: true})
     refresh_token: string;
 
