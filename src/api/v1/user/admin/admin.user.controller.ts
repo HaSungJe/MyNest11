@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AdminUserService } from "./admin.user.service";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
