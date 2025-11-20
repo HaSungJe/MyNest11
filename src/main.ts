@@ -6,10 +6,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ApiBadRequestResultDto, ValidationErrorDto } from './global.result.dto';
+import { DataSource } from 'typeorm';
 import dayjs from 'dayjs';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
-import { DataSource } from 'typeorm';
 
 async function bootstrap() {
     // 트렌젝션 컨텍스트 초기화
