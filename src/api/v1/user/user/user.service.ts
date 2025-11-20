@@ -10,7 +10,7 @@ import { SignDto } from './dto/sign.dto';
 import { User } from '../entities/t_user.entity';
 import { CheckLoginIdDto } from './dto/check.loginId.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiBadRequestResultDto, ApiFailResultDto } from '@root/global.result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto, ValidationErrorDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 import { v4 as UUID } from 'uuid';
 import * as util from '@util/util';
@@ -185,21 +185,18 @@ export class UserService {
             user.state_id = 'DONE';
             await this.userRepository.sign(user);
         } catch (error) {
-            const resultError: Record<string, any> = {};
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
-                resultError.message = '이미 사용중인 닉네임입니다.';
-                resultError.statusCode = HttpStatus.BAD_REQUEST;
-                resultError.validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
+                const message: string = '이미 사용중인 닉네임입니다.';
+                const validationError: Array<ValidationErrorDto> = util.createValidationError('nickname', message);
+                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
             } else if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_loginId') !== -1) {
-                resultError.message = '이미 사용중인 아이디입니다.';
-                resultError.statusCode = HttpStatus.BAD_REQUEST;
-                resultError.validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
+                const message: string = '이미 사용중인 아이디입니다.';
+                const validationError: Array<ValidationErrorDto> = util.createValidationError('login_id', message);
+                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
             } else {
-                resultError.message = '요청이 실패했습니다. 관리자에게 문의해주세요.';
-                resultError.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+                const message: string = '요청이 실패했습니다. 관리자에게 문의해주세요.';
+                throw new HttpException({message}, HttpStatus.INTERNAL_SERVER_ERROR);
             }
-
-            throw new HttpException(resultError, resultError.statusCode)
         }
     }
 
