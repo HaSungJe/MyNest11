@@ -119,18 +119,18 @@ export class UserService {
         }
 
         // 1. 로그인 정보 확인
-        const user: LoginUserDataType = await this.userLoginRepository.getLoginInfo(dto.refresh_token);
-        if (!user) {
+        const login: LoginUserDataType = await this.userLoginRepository.getLoginInfo(dto.refresh_token);
+        if (!login) {
             throw new UnauthorizedException({message: '올바르지 않은 인증정보입니다.'});
-        } else if (user.login_able_yn === 'N') {
+        } else if (login.login_able_yn === 'N') {
             throw new ForbiddenException({message: '사용이 정지된 계정입니다. 관리자에게 문의해주세요.'});
         }
 
         // 2-1. Refresh Token 생성
         const refreshToken = this.jwtService.sign({
             type: 'refresh',
-            user_id: user.user_id,
-            auth_id: user.auth_id
+            user_id: login.user_id,
+            auth_id: login.auth_id
         }, {expiresIn: '90d'});
         const refreshTokenDecode = await this.jwtService.decode(refreshToken);
         const refreshTokenIAT = new Date(refreshTokenDecode['iat'] * 1000);
@@ -139,24 +139,24 @@ export class UserService {
         // 2-2. Access Token 생성
         const accessToken = this.jwtService.sign({
             type: 'access',
-            user_id: user.user_id,
-            auth_id: user.auth_id
+            user_id: login.user_id,
+            auth_id: login.auth_id
         }, {expiresIn: '20m'})
         const accessTokenDecode = await this.jwtService.decode(accessToken);
         const accessTokenIAT = new Date(accessTokenDecode['iat'] * 1000);
         const accessTokenEXP = new Date(accessTokenDecode['exp'] * 1000);
 
         // 3. 로그인키 재발급
-        const login = new UserLogin();
-        login.access_token = accessToken;
-        login.access_token_start_dt = accessTokenIAT;
-        login.access_token_end_dt = accessTokenEXP;
-        login.refresh_token = refreshToken;
-        login.refresh_token_start_dt = refreshTokenIAT;
-        login.refresh_token_end_dt = refreshTokenEXP;
+        const refresh = new UserLogin();
+        refresh.access_token = accessToken;
+        refresh.access_token_start_dt = accessTokenIAT;
+        refresh.access_token_end_dt = accessTokenEXP;
+        refresh.refresh_token = refreshToken;
+        refresh.refresh_token_start_dt = refreshTokenIAT;
+        refresh.refresh_token_end_dt = refreshTokenEXP;
 
         try {
-            await this.userLoginRepository.refresh(login);
+            await this.userLoginRepository.refresh(login.user_login_id, refresh);
             return { 
                 refresh_token: refreshToken, 
                 access_token: accessToken, 
@@ -189,15 +189,13 @@ export class UserService {
         } catch (error) {
             const resultError: Record<string, any> = {};
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
-                const validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
                 resultError.message = '이미 사용중인 닉네임입니다.';
                 resultError.statusCode = HttpStatus.BAD_REQUEST;
-                resultError.validationError = validationError;
+                resultError.validationError = util.createValidationError('nickname', '이미 사용중인 닉네임입니다.');
             } else if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_loginId') !== -1) {
-                const validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
                 resultError.message = '이미 사용중인 아이디입니다.';
                 resultError.statusCode = HttpStatus.BAD_REQUEST;
-                resultError.validationError = validationError;
+                resultError.validationError = util.createValidationError('nickname', '이미 사용중인 아이디입니다.');
             } else {
                 resultError.message = '요청이 실패했습니다. 관리자에게 문의해주세요.';
                 resultError.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;

@@ -52,11 +52,12 @@ export class UserLoginRepository implements UserLoginRepositoryInterface {
     /**
      * 로그인키 재발급
      * 
+     * @param user_login_id 
      * @param login 
      */
-    async refresh(login: UserLogin): Promise<void> {
+    async refresh(user_login_id: string, login: UserLogin): Promise<void> {
         try {
-            await this.repository.update(login.user_login_id, login);
+            await this.repository.update(user_login_id, login);
         } catch (error) {
             throw error;
         }

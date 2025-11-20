@@ -27,7 +27,8 @@ export interface UserLoginRepositoryInterface {
     /**
      * 로그인키 재발급
      * 
+     * @param user_login_id 
      * @param login 
      */
-    refresh(login: UserLogin): Promise<void>;
+    refresh(user_login_id: string, login: UserLogin): Promise<void>;
 }
