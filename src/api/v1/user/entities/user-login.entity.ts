@@ -1,5 +1,5 @@
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { User } from "./t_user.entity";
+import { User } from "./user.entity";
 
 /**
  * 회원 로그인정보 Entity

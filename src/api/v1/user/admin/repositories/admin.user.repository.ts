@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FindManyOptions, Repository } from 'typeorm';
-import { User } from '../../entities/t_user.entity';
+import { User } from '../../entities/user.entity';
 import { AdminUserListDto } from '../dto/list.dto';
 import { AdminUserListVO } from '../vo/list.vo';
 import { Pagination, PaginationResultDto } from '@root/util/pagination';

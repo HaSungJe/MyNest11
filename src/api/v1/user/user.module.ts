@@ -7,10 +7,10 @@ import { PassportJwtAuthModule } from '@root/guards/passport.jwt.auth/passport.j
 import { AdminUserController } from './admin/admin.user.controller';
 import { AdminUserService } from './admin/admin.user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/t_user.entity';
-import { State } from './entities/t_state.entity';
-import { Auth } from './entities/t_auth.entity';
-import { UserLogin } from './entities/t_user_login.entity';
+import { User } from './entities/user.entity';
+import { State } from './entities/state.entity';
+import { Auth } from './entities/auth.entity';
+import { UserLogin } from './entities/user-login.entity';
 import { UserRepository } from './user/repositories/user.repository';
 import { UserLoginRepository } from './user/repositories/user-login.repository';
 import { AdminUserRepository } from './admin/repositories/admin.user.repository';

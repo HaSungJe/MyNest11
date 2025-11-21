@@ -1,5 +1,5 @@
 import { FindManyOptions } from "typeorm";
-import { User } from "../../entities/t_user.entity";
+import { User } from "../../entities/user.entity";
 
 export type FindUserType = {
     user_id: string;

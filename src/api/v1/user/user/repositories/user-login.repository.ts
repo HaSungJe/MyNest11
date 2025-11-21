@@ -1,5 +1,5 @@
 import { Repository } from "typeorm";
-import { UserLogin } from "../../entities/t_user_login.entity";
+import { UserLogin } from "../../entities/user-login.entity";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LoginUserDataType, UserLoginRepositoryInterface } from "../interfaces/user-login.repository.interface";

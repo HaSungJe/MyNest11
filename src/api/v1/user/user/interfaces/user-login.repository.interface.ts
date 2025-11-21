@@ -1,4 +1,4 @@
-import { UserLogin } from "../../entities/t_user_login.entity";
+import { UserLogin } from "../../entities/user-login.entity";
 
 export type LoginUserDataType = {
     user_id: string;

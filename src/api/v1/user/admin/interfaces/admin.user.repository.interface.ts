@@ -2,7 +2,7 @@ import { PaginationResultDto } from "@root/util/pagination";
 import { AdminUserListDto } from "../dto/list.dto";
 import { AdminUserListVO } from "../vo/list.vo";
 import { FindManyOptions } from "typeorm";
-import { User } from "../../entities/t_user.entity";
+import { User } from "../../entities/user.entity";
 
 export interface AdminUserRepositoryInterface {
     /**
