@@ -1,6 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Unique } from "typeorm";
-import { Auth } from "./t_auth.entity";
-import { State } from "./t_state.entity";
+import { Auth } from "./auth.entity";
+import { State } from "./state.entity";
 
 /**
  * 회원 정보 Entity
