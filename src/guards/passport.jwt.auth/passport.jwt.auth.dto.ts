@@ -2,7 +2,7 @@ import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 
 // 로그인한 회원의 정보
-export class PassportUserResultDto {
+export class PassportUserResultVo {
     @ApiProperty({description: '회원 ID', required: true})
     user_id: string;
 
@@ -30,6 +30,6 @@ export class PassportUserSuccessResultDto {
     @ApiProperty({description: 'http 상태코드', required: true})
     statusCode: HttpStatus.OK;
 
-    @ApiProperty(({description: '회원 정보', required: true, type: PassportUserResultDto}))
-    info: PassportUserResultDto;
+    @ApiProperty(({description: '회원 정보', required: true, type: PassportUserResultVo}))
+    info: PassportUserResultVo;
 }

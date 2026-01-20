@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { DataSource } from "typeorm";
-import { PassportUserResultDto } from "./passport.jwt.auth.dto";
+import { PassportUserResultVo } from "./passport.jwt.auth.dto";
 
 @Injectable()
 export class PassPortJwtAuthService {
@@ -9,12 +9,26 @@ export class PassPortJwtAuthService {
     ) {}
 
     /**
+     * AccessToken 유효성 검증
+     * 
+     * @param accessToken 
+     * @returns 
+     */
+    async checkAccessToken(accessToken: string): Promise<boolean> {
+        const builder = this.dataSource.createQueryBuilder();
+        builder.from('t_user_login', 'ul');
+        builder.where('ul.access_token = :accessToken', {accessToken});
+        const result: number = await builder.getCount();
+        return result > 0 ? true : false;
+    }
+
+    /**
      * 로그인 정보 확인
      * 
      * @param user_id 
      * @returns 
      */
-    async getLoginUser(user_id: string): Promise<PassportUserResultDto> {
+    async getLoginUser(user_id: string): Promise<PassportUserResultVo> {
         try {
             // 1. 회원 정보 조회
             const builder = this.dataSource.createQueryBuilder();
@@ -32,7 +46,7 @@ export class PassPortJwtAuthService {
             builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
             builder.where('u.user_id = :user_id', {user_id});
             builder.andWhere('s.login_able_yn = :login_able_yn', {login_able_yn: 'Y'});
-            const result: PassportUserResultDto = await builder.getRawOne();
+            const result: PassportUserResultVo = await builder.getRawOne();
             if (result) {
                 return result;
             } else {

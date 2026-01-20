@@ -1,14 +1,16 @@
-import { Body, Controller, Delete, Get, Headers, HttpStatus, Ip, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpStatus, Ip, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { PassportJwtAuthGuard } from '@root/guards/passport.jwt.auth/passport.jwt.auth.guard';
-import { PassportUserSuccessResultDto } from '@root/guards/passport.jwt.auth/passport.jwt.auth.dto';
+import { PassportUserResultVo, PassportUserSuccessResultDto } from '@root/guards/passport.jwt.auth/passport.jwt.auth.dto';
 import { SignDto } from './dto/sign.dto';
-import { CheckLoginIdDto } from './dto/check.loginId.dto';
+import { CheckLoginIdDto } from './dto/check.login-id.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
 import { ApiBadRequestResultDto, ApiFailResultDto } from '@root/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
+import { PatchNicknameDto } from './dto/patch.nickname.dto';
+import { PutUserInfoDto } from './dto/put.user-info.dto';
 
 @ApiTags('회원')
 @Controller('/api/v1/user')
@@ -83,7 +85,7 @@ export class UserController {
      * @param dto 
      * @returns 
      */
-    @Put('/sign')
+    @Post('/sign')
     @ApiOperation({summary: '회원가입'})
     @ApiNoContentResponse()
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
@@ -102,11 +104,11 @@ export class UserController {
      * @param dto 
      * @returns 
      */
-    @Post('/check/id')
+    @Get('/check/id/:login_id')
     @ApiOperation({summary: '아이디 중복 확인'})
     @ApiNoContentResponse()
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
-    async checkLoginId(@Body() dto: CheckLoginIdDto): Promise<void | ApiBadRequestResultDto> {
+    async checkLoginId(@Param() dto: CheckLoginIdDto): Promise<void | ApiBadRequestResultDto> {
         try {
             await this.service.checkLoginId(dto);
         } catch (error) {
@@ -120,13 +122,59 @@ export class UserController {
      * @param dto 
      * @returns 
      */
-    @Post('/check/nickname')
+    @Get('/check/nickname/:nickname')
     @ApiOperation({summary: '닉네임 중복 확인'})
     @ApiNoContentResponse()
     @ApiBadRequestResponse({type: ApiBadRequestResultDto})
-    async checkNickname(@Body() dto: CheckNicknameDto): Promise<void | ApiBadRequestResultDto> {
+    async checkNickname(@Param() dto: CheckNicknameDto): Promise<void | ApiBadRequestResultDto> {
         try {
             await this.service.checkNickname(dto);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
+     * 닉네임 변경
+     * 
+     * @param req 
+     * @param dto 
+     */
+    @Patch('/nickname')
+    @UseGuards(PassportJwtAuthGuard)
+    @ApiOperation({summary: '닉네임 변경'})
+    @ApiBody({type: PatchNicknameDto})
+    @ApiNoContentResponse()
+    @ApiUnauthorizedResponse({type: ApiFailResultDto})
+    @ApiForbiddenResponse({type: ApiFailResultDto})
+    @ApiInternalServerErrorResponse({type: ApiFailResultDto})
+    async patchNickname(@Req() req: any, @Body() dto: PatchNicknameDto): Promise<void | ApiBadRequestResultDto> {
+        try {
+            const user: PassportUserResultVo = req.user;
+            await this.service.patchNickname(user.user_id, dto.nickname);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
+     * 회원정보 수정
+     * 
+     * @param req 
+     * @param dto 
+     */
+    @Put('/info')
+    @UseGuards(PassportJwtAuthGuard)
+    @ApiOperation({summary: '회원정보 수정'})
+    @ApiBody({type: PutUserInfoDto})
+    @ApiNoContentResponse()
+    @ApiUnauthorizedResponse({type: ApiFailResultDto})
+    @ApiForbiddenResponse({type: ApiFailResultDto})
+    @ApiInternalServerErrorResponse({type: ApiFailResultDto})
+    async putUserInfo(@Req() req: any, @Body() dto: PutUserInfoDto): Promise<void | ApiBadRequestResultDto> {
+        try {
+            const user: PassportUserResultVo = req.user;
+            await this.service.putUserInfo(user.user_id, dto);
         } catch (error) {
             throw error;
         }

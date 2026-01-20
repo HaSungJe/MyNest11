@@ -4,7 +4,7 @@ import { Column, Entity, Index, PrimaryColumn } from "typeorm";
  * 권한 정보 Entity
  */
 @Entity({name: 't_auth', comment: '권한 정보'})
-@Index(['order'])
+@Index('Index_Auth_Order', ['order'])
 export class Auth {
     @PrimaryColumn({name: 'auth_id', length: 20, comment: '권한 ID', primaryKeyConstraintName: 'PK_Auth'})
     auth_id: string;

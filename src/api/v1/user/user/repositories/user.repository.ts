@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FindManyOptions, Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindUserType, UserRepositoryInterface } from '../interfaces/user.repository.interface';
+import { ValidationErrorDto } from '@root/global.result.dto';
+import * as util from '@util/util';
+import { PutUserInfoDto } from '../dto/put.user-info.dto';
 
 @Injectable()
 export class UserRepository implements UserRepositoryInterface {
@@ -14,11 +17,21 @@ export class UserRepository implements UserRepositoryInterface {
     /**
      * 회원 수
      * 
+     * @param type 
      * @param option 
      * @returns 
      */
-    async getCount(option: FindManyOptions<User>): Promise<number> {
-        return this.repository.count(option);
+    async getCount(type: 'login_id' | 'nickname', option: FindManyOptions<User>): Promise<void> {
+        try {
+            const count = await this.repository.count(option);
+            if (count > 0) {
+                const typeName: string = type === 'login_id' ? '아이디' : '닉네임';
+                const validationError = util.createValidationError(type, `이미 사용중인 ${typeName}입니다.`);
+                throw new HttpException({statusCode: HttpStatus.BAD_REQUEST, message: `이미 사용중인 ${typeName}입니다.`, validationError}, HttpStatus.BAD_REQUEST);
+            }
+        } catch (error) {
+            throw error;
+        }
     }
 
     /**
@@ -28,23 +41,27 @@ export class UserRepository implements UserRepositoryInterface {
      * @returns 
      */
     async findUserForLoginId(login_id: string): Promise<FindUserType | null> {
-        const builder = this.repository.createQueryBuilder('u');
-        builder.select(`
-              u.user_id 
-            , u.login_id 
-            , u.login_pw 
-            , u.name 
-            , u.nickname 
-            , a.auth_id 
-            , a.auth_name 
-            , s.state_id 
-            , s.state_name 
-            , s.login_able_yn 
-        `);
-        builder.innerJoin('t_state', 's', 'u.state_id = s.state_id and s.state_id = :state_id', {state_id: 'DONE'});
-        builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
-        builder.where('u.login_id = :login_id', {login_id});
-        return builder.getRawOne<FindUserType>();
+        try {
+            const builder = this.repository.createQueryBuilder('u');
+            builder.select(`
+                  u.user_id 
+                , u.login_id 
+                , u.login_pw 
+                , u.name 
+                , u.nickname 
+                , a.auth_id 
+                , a.auth_name 
+                , s.state_id 
+                , s.state_name 
+                , s.login_able_yn 
+            `);
+            builder.innerJoin('t_state', 's', 'u.state_id = s.state_id and s.state_id = :state_id', {state_id: 'DONE'});
+            builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
+            builder.where('u.login_id = :login_id', {login_id});
+            return builder.getRawOne<FindUserType>();
+        } catch (error) {
+            throw error;
+        }
     }
 
     /**
@@ -57,7 +74,58 @@ export class UserRepository implements UserRepositoryInterface {
         try {
             await this.repository.insert(user);
         } catch (error) {
-            throw error;
+            if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
+                const message: string = '이미 사용중인 닉네임입니다.';
+                const validationError: Array<ValidationErrorDto> = util.createValidationError('nickname', message);
+                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+            } else if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_loginId') !== -1) {
+                const message: string = '이미 사용중인 아이디입니다.';
+                const validationError: Array<ValidationErrorDto> = util.createValidationError('login_id', message);
+                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    /**
+     * 회원정보 수정
+     * 
+     * @param user_id 
+     * @param dto 
+     */
+    async putUserInfo(user_id: string, dto: PutUserInfoDto): Promise<void> {
+        try {
+            await this.repository.update(user_id, dto);
+        } catch (error) {
+            if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
+                const message: string = '이미 사용중인 닉네임입니다.';
+                const validationError: Array<ValidationErrorDto> = util.createValidationError('nickname', message);
+                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    /**
+     * 닉네임 변경
+     * 
+     * @param user_id 
+     * @param nickname 
+     */
+    async patchNickname(user_id: string, nickname: string): Promise<void> {
+        try {
+            await this.repository.update(user_id, {nickname});
+        } catch (error) {
+            if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
+                const message: string = '이미 사용중인 닉네임입니다.';
+                const validationError: Array<ValidationErrorDto> = util.createValidationError('nickname', message);
+                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+            } else {
+                const message: string = '요청이 실패했습니다. 관리자에게 문의해주세요.';
+                throw new HttpException({message}, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
@@ -74,3 +142,4 @@ export class UserRepository implements UserRepositoryInterface {
         }
     }
 }
+

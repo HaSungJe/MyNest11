@@ -1,5 +1,7 @@
 import { FindManyOptions } from "typeorm";
 import { User } from "../../entities/user.entity";
+import { ApiBadRequestResultDto } from "@root/global.result.dto";
+import { PutUserInfoDto } from "../dto/put.user-info.dto";
 
 export type FindUserType = {
     user_id: string;
@@ -18,10 +20,11 @@ export interface UserRepositoryInterface {
     /**
      * 회원 수
      * 
+     * @param type 
      * @param option 
      * @returns 
      */
-    getCount(option: FindManyOptions<User>): Promise<number>;
+    getCount(type: string, option: FindManyOptions<User>): Promise<void | ApiBadRequestResultDto>;
 
     /**
      * 아이디로 회원정보 조회
@@ -37,6 +40,22 @@ export interface UserRepositoryInterface {
      * @returns 
      */
     sign(user: User): Promise<void>;
+
+    /**
+     * 닉네임 변경
+     * 
+     * @param user_id 
+     * @param nickname 
+     */
+    patchNickname(user_id: string, nickname: string): Promise<void>;
+
+    /**
+     * 회원정보 수정
+     * 
+     * @param user_id 
+     * @param dto 
+     */
+    putUserInfo(user_id: string, dto: PutUserInfoDto): Promise<void>;
 
     /**
      * 회원탈퇴
