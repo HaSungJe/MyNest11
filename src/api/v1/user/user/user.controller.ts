@@ -76,7 +76,7 @@ export class UserController {
     @ApiOkResponse({type: PassportUserSuccessResultDto})
     @ApiUnauthorizedResponse({type: ApiFailResultDto})
     async info(@Req() req: any): Promise<PassportUserSuccessResultDto | ApiFailResultDto> {
-        return { statusCode: HttpStatus.OK, info: req.user };
+        return { info: req.user };
     }
 
     /**

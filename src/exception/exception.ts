@@ -9,7 +9,6 @@ export class CustomErrorFilter implements ExceptionFilter {
             const ctx = host.switchToHttp();
             const response = ctx.getResponse<Response>();
             const errorResponse = {
-                statusCode: HttpStatus.PAYLOAD_TOO_LARGE,
                 code: 'DATA_TO_LARGE',
                 message: `한 요청당 제한된 크기를 초과하였습니다. [최대 15Mb]`,
             };
@@ -21,10 +20,9 @@ export class CustomErrorFilter implements ExceptionFilter {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
         if (exception['response']) {
-            exception['response']['statusCode'] = exception['status'];
             return response.status(exception['status']).send(exception['response']);
         } else {
-            return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'});
+            return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({message: '요청이 실패했습니다. 관리자에게 문의해주세요.'});
         }
     }
 }

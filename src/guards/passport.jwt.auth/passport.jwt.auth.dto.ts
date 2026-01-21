@@ -27,9 +27,6 @@ export class PassportUserResultVo {
 
 // 로그인한 회원의 정보 - 성공
 export class PassportUserSuccessResultDto {
-    @ApiProperty({description: 'http 상태코드', required: true})
-    statusCode: HttpStatus.OK;
-
     @ApiProperty(({description: '회원 정보', required: true, type: PassportUserResultVo}))
     info: PassportUserResultVo;
 }

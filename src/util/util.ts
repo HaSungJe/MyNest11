@@ -1,6 +1,6 @@
 import { utils, write, read } from 'xlsx-js-style';
 import { parseStringPromise } from 'xml2js';
-import { HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { ValidationErrorDto } from '@root/global.result.dto';
 import nodemailer from 'nodemailer';
 import sharp from 'sharp';
@@ -391,9 +391,9 @@ export function readExcel(conf: any, file: Express.Multer.File) {
             }
         }
 
-        return { statusCode: HttpStatus.OK, result: result };
-    } catch (err) {
-        return { statusCode: HttpStatus.BAD_REQUEST, message: '파일을 읽어오는데 실패하였습니다.' }
+        return { result };
+    } catch (error) {
+        throw new BadRequestException({message: '파일을 읽어오는데 실패하였습니다.'});
     }
 }
 
@@ -420,7 +420,7 @@ export async function readXmlOnlyRow(file: string) {
  * @param email 
  * @returns 
  */
-export async function sendEmail(email: string, subject: string, text: string) {
+export async function sendEmail(email: string, subject: string, text: string): Promise<void> {
     const transporter = nodemailer.createTransport({
         service: 'naver',
         host: 'smtp.naver.com',
@@ -438,10 +438,8 @@ export async function sendEmail(email: string, subject: string, text: string) {
             subject: subject,
             text: text,
         });
-
-        return { statusCode: HttpStatus.OK }
     } catch (err) {
-        return { statusCode: HttpStatus.BAD_REQUEST, message: '이메일 전송 실패' }
+        throw new BadRequestException({message: '이메일 전송 실패'});
     } finally {
         transporter.close();
     }

@@ -96,7 +96,7 @@ export class UserService {
                 access_token_end_dt: accessTokenEXP 
             }
         } catch (error) {
-            throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException({message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -163,7 +163,7 @@ export class UserService {
                 access_token_end_dt: accessTokenEXP 
             }
         } catch (error) {
-            throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException({message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -275,7 +275,7 @@ export class UserService {
         try {
             await this.userRepository.leave(user_id);
         } catch (error) {
-            throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException({message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

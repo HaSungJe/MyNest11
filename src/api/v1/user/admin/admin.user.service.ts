@@ -28,7 +28,7 @@ export class AdminUserService {
 
             return { list, total_count, pagination };
         } catch (error) {
-            throw new HttpException({statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException({message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -27,7 +27,7 @@ export class UserRepository implements UserRepositoryInterface {
             if (count > 0) {
                 const typeName: string = type === 'login_id' ? '아이디' : '닉네임';
                 const validationError = util.createValidationError(type, `이미 사용중인 ${typeName}입니다.`);
-                throw new HttpException({statusCode: HttpStatus.BAD_REQUEST, message: `이미 사용중인 ${typeName}입니다.`, validationError}, HttpStatus.BAD_REQUEST);
+                throw new HttpException({message: `이미 사용중인 ${typeName}입니다.`, validationError}, HttpStatus.BAD_REQUEST);
             }
         } catch (error) {
             throw error;
