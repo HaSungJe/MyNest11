@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { PaginationDto, PaginationResultDto } from "@root/util/pagination";
 import { AdminUserListVO } from "../vo/list.vo";
+import { PaginationDto, PaginationResultDto } from "@root/common/dto/pagination.dto";
 
 /**
  * 회원 목록 Dto

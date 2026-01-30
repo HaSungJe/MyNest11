@@ -10,11 +10,12 @@ import { SignDto } from './dto/sign.dto';
 import { User } from '../entities/user.entity';
 import { CheckLoginIdDto } from './dto/check.login-id.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiBadRequestResultDto, ApiFailResultDto, ValidationErrorDto } from '@root/global.result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto, ValidationErrorDto } from '@root/common/dto/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 import { v4 as UUID } from 'uuid';
 import { PutUserInfoDto } from './dto/put.user-info.dto';
-import * as util from '@util/util';
+import { createValidationError } from '@root/common/utils/validation';
+import { getBcrypt, matchBcrypt } from '@root/common/utils/bcrypt';
 
 @Injectable()
 export class UserService {
@@ -37,7 +38,7 @@ export class UserService {
         // 1. 아이디/비밀번호 확인
         const user: FindUserType = await this.userRepository.findUserForLoginId(dto.login_id);
         if (user) {
-            const match = await util.matchBcrypt(dto.login_pw, user.login_pw);
+            const match = await matchBcrypt(dto.login_pw, user.login_pw);
             if (!match) {
                 throw new UnauthorizedException({message: '아이디 또는 비밀번호가 잘못되었습니다.'});
             } else if (user.login_able_yn === 'N') {
@@ -177,15 +178,15 @@ export class UserService {
     async sign(dto: SignDto): Promise<void | ApiBadRequestResultDto | ApiFailResultDto> {
         if (dto.login_pw !== dto.login_pw2) {
             const message: string = '비밀번호가 일치하지 않습니다.';
-            const validationError: Array<ValidationErrorDto> = util.createValidationError('login_pw2', message);
-            throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+            const validationErrors: Array<ValidationErrorDto> = createValidationError('login_pw2', message);
+            throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
         }
 
         try {
             const user = new User();
             user.user_id = UUID().replaceAll('-', '');
             user.login_id = dto.login_id;
-            user.login_pw = await util.getBcrypt(dto.login_pw);
+            user.login_pw = await getBcrypt(dto.login_pw);
             user.name = dto.name;
             user.nickname = dto.nickname;
             user.auth_id = 'USER';
@@ -249,13 +250,13 @@ export class UserService {
     async putUserInfo(user_id: string, dto: PutUserInfoDto): Promise<void | ApiBadRequestResultDto> {
         if (dto.login_pw !== dto.login_pw2) {
             const message: string = '비밀번호가 일치하지 않습니다.';
-            const validationError: Array<ValidationErrorDto> = util.createValidationError('login_pw2', message);
-            throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+            const validationErrors: Array<ValidationErrorDto> = createValidationError('login_pw2', message);
+            throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
         }
 
         try {
             const user = new User();
-            user.login_pw = await util.getBcrypt(dto.login_pw);
+            user.login_pw = await getBcrypt(dto.login_pw);
             user.name = dto.name;
             user.nickname = dto.nickname;
             await this.userRepository.putUserInfo(user_id, dto);

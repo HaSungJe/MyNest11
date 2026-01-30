@@ -3,9 +3,9 @@ import { FindManyOptions, Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindUserType, UserRepositoryInterface } from '../interfaces/user.repository.interface';
-import { ValidationErrorDto } from '@root/global.result.dto';
-import * as util from '@util/util';
+import { ValidationErrorDto } from '@root/common/dto/global.result.dto';
 import { PutUserInfoDto } from '../dto/put.user-info.dto';
+import { createValidationError } from '@root/common/utils/validation';
 
 @Injectable()
 export class UserRepository implements UserRepositoryInterface {
@@ -26,8 +26,8 @@ export class UserRepository implements UserRepositoryInterface {
             const count = await this.repository.count(option);
             if (count > 0) {
                 const typeName: string = type === 'login_id' ? '아이디' : '닉네임';
-                const validationError = util.createValidationError(type, `이미 사용중인 ${typeName}입니다.`);
-                throw new HttpException({message: `이미 사용중인 ${typeName}입니다.`, validationError}, HttpStatus.BAD_REQUEST);
+                const validationErrors = createValidationError(type, `이미 사용중인 ${typeName}입니다.`);
+                throw new HttpException({message: `이미 사용중인 ${typeName}입니다.`, validationErrors}, HttpStatus.BAD_REQUEST);
             }
         } catch (error) {
             throw error;
@@ -76,12 +76,12 @@ export class UserRepository implements UserRepositoryInterface {
         } catch (error) {
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
                 const message: string = '이미 사용중인 닉네임입니다.';
-                const validationError: Array<ValidationErrorDto> = util.createValidationError('nickname', message);
-                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+                const validationErrors: Array<ValidationErrorDto> = createValidationError('nickname', message);
+                throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
             } else if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_loginId') !== -1) {
                 const message: string = '이미 사용중인 아이디입니다.';
-                const validationError: Array<ValidationErrorDto> = util.createValidationError('login_id', message);
-                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+                const validationErrors: Array<ValidationErrorDto> = createValidationError('login_id', message);
+                throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
             } else {
                 throw error;
             }
@@ -100,8 +100,8 @@ export class UserRepository implements UserRepositoryInterface {
         } catch (error) {
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
                 const message: string = '이미 사용중인 닉네임입니다.';
-                const validationError: Array<ValidationErrorDto> = util.createValidationError('nickname', message);
-                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+                const validationErrors: Array<ValidationErrorDto> = createValidationError('nickname', message);
+                throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
             } else {
                 throw error;
             }
@@ -120,8 +120,8 @@ export class UserRepository implements UserRepositoryInterface {
         } catch (error) {
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
                 const message: string = '이미 사용중인 닉네임입니다.';
-                const validationError: Array<ValidationErrorDto> = util.createValidationError('nickname', message);
-                throw new HttpException({message, validationError}, HttpStatus.BAD_REQUEST);
+                const validationErrors: Array<ValidationErrorDto> = createValidationError('nickname', message);
+                throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
             } else {
                 const message: string = '요청이 실패했습니다. 관리자에게 문의해주세요.';
                 throw new HttpException({message}, HttpStatus.INTERNAL_SERVER_ERROR);

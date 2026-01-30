@@ -7,7 +7,7 @@ import { PassportUserResultVo, PassportUserSuccessResultDto } from '@root/guards
 import { SignDto } from './dto/sign.dto';
 import { CheckLoginIdDto } from './dto/check.login-id.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
-import { ApiBadRequestResultDto, ApiFailResultDto } from '@root/global.result.dto';
+import { ApiBadRequestResultDto, ApiFailResultDto } from '@root/common/dto/global.result.dto';
 import { RefreshDto, RefreshResultDto } from './dto/refresh.dto';
 import { PatchNicknameDto } from './dto/patch.nickname.dto';
 import { PutUserInfoDto } from './dto/put.user-info.dto';

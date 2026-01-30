@@ -3,7 +3,7 @@ import { ADMIN_USER_REPOSITORY } from "../user.symbols";
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { Not } from "typeorm";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
-import { ApiFailResultDto } from "@root/global.result.dto";
+import { ApiFailResultDto } from "@root/common/dto/global.result.dto";
 
 @Injectable()
 export class AdminUserService {

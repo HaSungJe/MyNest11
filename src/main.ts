@@ -5,7 +5,7 @@ import { CustomErrorFilter } from './exception/exception';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { ValidationErrorDto } from './global.result.dto';
+import { ValidationErrorDto } from './common/dto/global.result.dto';
 import { DataSource } from 'typeorm';
 import dayjs from 'dayjs';
 import * as bodyParser from 'body-parser';
@@ -121,7 +121,7 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
             exceptionFactory: (errors) => {
                 const result: Record<string, any> = {};
-                result.validationError = [];
+                result.validationErrors = [];
 
                 for (let i=0; i<errors.length; i++) {
                     const error = errors[i];
@@ -141,10 +141,10 @@ async function bootstrap() {
                         errorDto.message = error?.constraints[errorDto.type];
                     }
 
-                    result.validationError.push(errorDto)
+                    result.validationErrors.push(errorDto)
                 }
 
-                result.message = result.validationError.length > 0 ? result.validationError[0].message : '실패했습니다.';
+                result.message = result.validationErrors.length > 0 ? result.validationErrors[0].message : '실패했습니다.';
                 return new BadRequestException(result);
             }
         }),

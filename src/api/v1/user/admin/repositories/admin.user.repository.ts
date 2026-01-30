@@ -3,9 +3,10 @@ import { FindManyOptions, Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { AdminUserListDto } from '../dto/list.dto';
 import { AdminUserListVO } from '../vo/list.vo';
-import { Pagination, PaginationResultDto } from '@root/util/pagination';
+import { Pagination } from '@root/common/utils/pagination';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminUserRepositoryInterface } from '../interfaces/admin.user.repository.interface';
+import { PaginationResultDto } from '@root/common/dto/pagination.dto';
 
 @Injectable()
 export class AdminUserRepository implements AdminUserRepositoryInterface {

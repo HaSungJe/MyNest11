@@ -1,69 +1,18 @@
-import { ApiProperty } from "@nestjs/swagger";
-
-/**
- * 페이지탭에 표시될 페이지목록의 범위
- */
-class PageRangeResultDto {
-    @ApiProperty({description: '시작값', required: true})
-    start: number;
-
-    @ApiProperty({description: '종료값', required: true})
-    end: number;
-}
-
-/**
- * 페이지 정보
- */
-export class PaginationResultDto {
-    @ApiProperty({description: '전체검색 여부(Y/N)', required: true})
-    all_search_yn: string;
-
-    @ApiProperty({description: '총 개수', required: true})
-    totalCount: number;
-
-    @ApiProperty({description: '현재 페이지', required: true})
-    page: number;
-
-    @ApiProperty({description: '최대 페이지', required: true})
-    maxPage: number;
-
-    @ApiProperty({description: '페이지탭에 표시될 페이지목록의 범위', type: () => PageRangeResultDto, required: true})
-    pageRange: PageRangeResultDto;
-
-    @ApiProperty({description: '컨텐츠에 표시할 번호 시작값', required: true})
-    content_start_number: number;
-
-    @ApiProperty({description: '컨텐츠에 표시할 번호 시작값 (역순)', required: true})
-    content_start_number_reverse: number;
-}
-
-/**
- * 페이지정보 Dto
- */
-export class PaginationDto {
-    @ApiProperty({description: '페이지. 기본값: 1', required: false})
-    page: number;
-
-    @ApiProperty({description: '페이지당 출력될 데이터 수. 기본값: 10', required: false})
-    size: number;
-
-    @ApiProperty({description: '페이지탭에 출력될 페이지의 수. 기본값: 10', required: false})
-    pageSize: number;
-}
+import { PaginationResultDto } from "../dto/pagination.dto";
 
 /**
  * 페이징
  */
 export class Pagination {
-    public readonly all_search_yn: string = 'N'; // 전체검색 여부(Y/N)
-    public readonly size: number; // 페이지당 출력될 데이터 수
-    public readonly pageSize: number; // 페이지탭에 출력될 페이지의 수
-    public readonly totalCount: number; // 총 게시글 수
-    public readonly page: number; // 현재 페이지
-    public readonly maxPage: number; // 마지막 페이지
-    public readonly pageRange: any; // 페이지탭에 출력될 페이지의 시작과 끝 값
-    public readonly limit: number; // Query용 limit 값
-    public readonly offset: number; // Query용 offset 값
+    public all_search_yn: string = 'N'; // 전체검색 여부(Y/N)
+    public size: number; // 페이지당 출력될 데이터 수
+    public pageSize: number; // 페이지탭에 출력될 페이지의 수
+    public totalCount: number; // 총 게시글 수
+    public page: number; // 현재 페이지
+    public maxPage: number; // 마지막 페이지
+    public pageRange: any; // 페이지탭에 출력될 페이지의 시작과 끝 값
+    public limit: number; // Query용 limit 값
+    public offset: number; // Query용 offset 값
 
     constructor (data: any) {
         if (data) {
@@ -136,4 +85,3 @@ export class Pagination {
         }
     }
 }
-
