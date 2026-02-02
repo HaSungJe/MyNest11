@@ -13,9 +13,9 @@ export interface UserLoginRepositoryInterface {
     /**
      * 로그인 정보 확인
      * 
-     * @param refresh_token 
+     * @param userLoginId 
      */
-    getLoginInfo(refresh_token: string): Promise<LoginUserDataType | null>;
+    getLoginInfo(userLoginId: string): Promise<LoginUserDataType | null>;
 
     /**
      * 로그인 이력 저장

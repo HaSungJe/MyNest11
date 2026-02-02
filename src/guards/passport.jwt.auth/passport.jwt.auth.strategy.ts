@@ -26,16 +26,9 @@ export class PassportJwtAuthStrategy extends PassportStrategy(Strategy, 'jwt-use
      */
     async validate(req: Request, payload: any) {
         if (payload && 'access' === payload?.type) {
-            const accessToken: string = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-            const checkAccessToken = await this.service.checkAccessToken(accessToken);
-
-            if (checkAccessToken) {
-                const user = await this.service.getLoginUser(payload?.user_id || '');
-                if (user) {
-                    return user;
-                } else {
-                    throw new UnauthorizedException();
-                }
+            const user = await this.service.getLoginUser(payload?.user_id || '');
+            if (user) {
+                return user;
             } else {
                 throw new UnauthorizedException();
             }

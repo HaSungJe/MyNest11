@@ -9,20 +9,6 @@ export class PassPortJwtAuthService {
     ) {}
 
     /**
-     * AccessToken 유효성 검증
-     * 
-     * @param accessToken 
-     * @returns 
-     */
-    async checkAccessToken(accessToken: string): Promise<boolean> {
-        const builder = this.dataSource.createQueryBuilder();
-        builder.from('t_user_login', 'ul');
-        builder.where('ul.access_token = :accessToken', {accessToken});
-        const result: number = await builder.getCount();
-        return result > 0 ? true : false;
-    }
-
-    /**
      * 로그인 정보 확인
      * 
      * @param user_id 
