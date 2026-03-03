@@ -21,7 +21,7 @@ export class Auth {
     insert into t_auth (
         auth_id, auth_name, level
     ) values (
-        'SUPER_ADMIN', '총괄관리자, 999
+        'SUPER_ADMIN', '총괄관리자', 999
     ), (
         'ADMIN', '관리자', 998
     ), (

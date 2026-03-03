@@ -12,8 +12,8 @@ npm run start:prod     # Run compiled output
 
 # Build & Lint
 npm run build          # Compile TypeScript via NestJS CLI
-npm run lint           # ESLint with auto-fix
-npm run format         # Prettier format
+npm run lint           # ESLint with auto-fix — DO NOT RUN (reformats all files)
+npm run format         # Prettier format      — DO NOT RUN (reformats all files)
 
 # Tests
 npm run test                        # Run all unit tests
@@ -22,6 +22,11 @@ npm run test:cov                    # Coverage report
 npm run test:e2e                    # End-to-end tests
 npx jest --testPathPattern=user     # Run tests matching a pattern (single file/domain)
 ```
+
+## ⚠️ 주의사항
+
+- **`npm run lint` 및 `npm run format` 절대 실행 금지** — 실행 시 프로젝트 전체 파일의 들여쓰기/줄바꿈 포맷이 변경됨
+- 컴파일 오류 확인은 반드시 **`npm run build`** 만 사용할 것
 
 ## Environment Variables (.env)
 
