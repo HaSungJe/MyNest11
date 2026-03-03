@@ -24,8 +24,8 @@ async function bootstrap() {
     app.useGlobalFilters(new CustomErrorFilter());
 
     // 기본 템플릿 ejs 설정. 운영환경에서는 public과 views의 경로를 한 번 더 상위로 이동
-    app.useStaticAssets(path.resolve(__dirname, process.env.SERVER === 'DEV' ? '../../public' : '../../../public'));
-    app.setBaseViewsDir(path.resolve(__dirname, process.env.SERVER === 'DEV' ? '../../views' : '../../../views'));
+    app.useStaticAssets(path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../public' : '../../../public'));
+    app.setBaseViewsDir(path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../views' : '../../../views'));
     app.setViewEngine('ejs');
 
     // API Swagger

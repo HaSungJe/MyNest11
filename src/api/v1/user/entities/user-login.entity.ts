@@ -1,22 +1,22 @@
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { User } from "./user.entity";
+import { UserEntity } from "./user.entity";
 
 /**
  * 회원 로그인정보 Entity
  */
-@Entity({name: 't_user_login', comment: '회원 로그인정보'})
-export class UserLogin {
+@Entity({ name: 't_user_login', comment: '회원 로그인정보' })
+export class UserLoginEntity {
     @PrimaryColumn({name: 'user_login_id', length: 32, comment: '회원 ID', primaryKeyConstraintName: 'PK_User'})
     user_login_id: string;
 
-    @ManyToOne(() => User, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+    @ManyToOne(() => UserEntity, {nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE'})
     @JoinColumn({name: 'user_id', referencedColumnName: 'user_id', foreignKeyConstraintName: 'UserLogin_FK_User'})
     user_id: string;
 
-    @Column({name: 'refresh_token', nullable: false, comment: 'Refresh Token', length: 255})
+    @Column({name: 'refresh_token', type: 'text', nullable: false, comment: 'Refresh Token'})
     refresh_token: string;
 
-    @Column({name: 'access_token', nullable: false, comment: 'Access Token', length: 255})
+    @Column({name: 'access_token', type: 'text', nullable: false, comment: 'Access Token'})
     access_token: string;
 
     @Column({name: 'refresh_token_start_dt', type: 'timestamp', nullable: false, comment: 'Refresh Token 생성시간'})
@@ -36,7 +36,7 @@ export class UserLogin {
 
     @Column({name: 'ip', nullable: false, comment: 'ip', length: 30})
     ip: string;
-    
+
     @Column({name: 'agent', nullable: true, comment: 'Agent', length: 100})
     agent: string;
 

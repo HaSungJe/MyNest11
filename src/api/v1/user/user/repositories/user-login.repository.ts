@@ -1,5 +1,5 @@
 import { Repository } from "typeorm";
-import { UserLogin } from "../../entities/user-login.entity";
+import { UserLoginEntity } from "../../entities/user-login.entity";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LoginUserDataType, UserLoginRepositoryInterface } from "../interfaces/user-login.repository.interface";
@@ -7,9 +7,9 @@ import { LoginUserDataType, UserLoginRepositoryInterface } from "../interfaces/u
 @Injectable()
 export class UserLoginRepository implements UserLoginRepositoryInterface {
     constructor(
-        @InjectRepository(UserLogin)
-        private readonly repository: Repository<UserLogin>
-    ) {}
+        @InjectRepository(UserLoginEntity)
+        private readonly repository: Repository<UserLoginEntity>
+    ) { }
 
     /**
      * 로그인 정보 확인
@@ -27,11 +27,11 @@ export class UserLoginRepository implements UserLoginRepositoryInterface {
             , a.auth_id 
             , s.login_able_yn 
         `);
-        builder.innerJoin('t_user', 'u', 'l.user_id = u.user_id and u.state_id = :state_id', {state_id: 'DONE'});
+        builder.innerJoin('t_user', 'u', 'l.user_id = u.user_id and u.state_id = :state_id', { state_id: 'DONE' });
         builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
         builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
-        builder.where(`l.use_yn = :use_yn`, {use_yn: 'Y'});
-        builder.andWhere('l.user_login_id = :user_login_id', {userLoginId})
+        builder.where(`l.use_yn = :use_yn`, { use_yn: 'Y' });
+        builder.andWhere('l.user_login_id = :user_login_id', { userLoginId })
         builder.andWhere('now() < l.refresh_token_end_dt');
         return await builder.getRawOne<LoginUserDataType>();
     }
@@ -41,7 +41,7 @@ export class UserLoginRepository implements UserLoginRepositoryInterface {
      * 
      * @param login 
      */
-    async login(login: UserLogin): Promise<void> {
+    async login(login: UserLoginEntity): Promise<void> {
         try {
             await this.repository.insert(login);
         } catch (error) {
@@ -55,7 +55,7 @@ export class UserLoginRepository implements UserLoginRepositoryInterface {
      * @param user_login_id 
      * @param login 
      */
-    async refresh(user_login_id: string, login: UserLogin): Promise<void> {
+    async refresh(user_login_id: string, login: UserLoginEntity): Promise<void> {
         try {
             await this.repository.update(user_login_id, login);
         } catch (error) {

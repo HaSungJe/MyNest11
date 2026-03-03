@@ -1,5 +1,5 @@
 import { FindManyOptions } from "typeorm";
-import { User } from "../../entities/user.entity";
+import { UserEntity } from "../../entities/user.entity";
 import { ApiBadRequestResultDto } from "@root/common/dto/global.result.dto";
 import { PutUserInfoDto } from "../dto/put.user-info.dto";
 
@@ -24,7 +24,7 @@ export interface UserRepositoryInterface {
      * @param option 
      * @returns 
      */
-    getCount(type: string, option: FindManyOptions<User>): Promise<void | ApiBadRequestResultDto>;
+    getCount(type: string, option: FindManyOptions<UserEntity>): Promise<void | ApiBadRequestResultDto>;
 
     /**
      * 아이디로 회원정보 조회
@@ -39,7 +39,7 @@ export interface UserRepositoryInterface {
      * @param dto 
      * @returns 
      */
-    sign(user: User): Promise<void>;
+    sign(user: UserEntity): Promise<void>;
 
     /**
      * 닉네임 변경

@@ -74,6 +74,10 @@ src/
 
 ### Naming Conventions
 
+**Entity class names**: always use `*Entity` suffix — class name ends with `Entity`.
+- `UserEntity`, `AuthEntity`, `StateEntity`
+- Constraint names (PK/UK/IDX/FK) use the **short name without `Entity`** suffix: `PK_User`, `Unique_User_loginId`, `User_FK_Auth`
+
 **DTO files**: always use `*.dto.ts` suffix.
 - `pagination.dto.ts`, `global.result.dto.ts`
 
@@ -82,7 +86,7 @@ src/
 
 **Validation error key**: always use `validationErrors` — never any other name.
 - `ValidationPipe.exceptionFactory` in `main.ts` must use this key.
-- All manual throws must use this key: `{ message, validationErrors }`.
+- All manual throws must use this key: `{message, validationErrors}`.
 
 **API routes**: follow `/api/v1/<domain>/...` pattern in controllers.
 
@@ -109,7 +113,7 @@ src/api/v1/<domain>/
 @SetMetadata('type', 'API')
 @SetMetadata('description', '회원')
 @SetMetadata('path', 'user')
-@Module({ ... })
+@Module({...})
 export class UserModule {}
 ```
 Then register it in `app.module.ts` imports.
@@ -120,7 +124,10 @@ Then register it in `app.module.ts` imports.
 export const USER_REPOSITORY = Symbol('UserRepositoryInterface');
 
 // module.ts
-{ provide: USER_REPOSITORY, useClass: UserRepository }
+{ 
+    provide: USER_REPOSITORY, 
+    useClass: UserRepository 
+}
 
 // service.ts
 @Inject(USER_REPOSITORY) private readonly repo: UserRepositoryInterface
@@ -144,30 +151,32 @@ import { createValidationError } from '@root/common/utils/validation';
 
 | Type | Pattern | Example |
 |------|---------|---------|
-| PK | `PK_<EntityName>` | `PK_User`, `PK_Auth` |
-| UK | `Unique_<EntityName>_<ColumnName>` | `Unique_User_loginId` |
-| UK (composite) | `Unique_<EntityName>_<ColA>And<ColB>` | `Unique_User_loginIdAndstateId` |
-| IDX | `Index_<EntityName>_<ColumnName>` | `Index_Auth_order` |
-| IDX (composite) | `Index_<EntityName>_<ColA>And<ColB>` | `Index_User_stateIdAndcreateAt` |
-| FK | `FK_<ChildEntity>_<ParentEntity>` | `FK_User_Auth`, `FK_UserLogin_User` |
+| PK | `PK_<Name>` | `PK_User`, `PK_Auth` |
+| UK | `Unique_<Name>_<ColumnName>` | `Unique_User_loginId` |
+| UK (composite) | `Unique_<Name>_<ColA>And<ColB>` | `Unique_User_loginIdAndstateId` |
+| IDX | `Index_<Name>_<ColumnName>` | `Index_Auth_order` |
+| IDX (composite) | `Index_<Name>_<ColA>And<ColB>` | `Index_User_stateIdAndcreateAt` |
+| FK | `<ChildName>_FK_<ParentName>` | `User_FK_Auth`, `UserLogin_FK_User` |
+
+> `<Name>` = 클래스명에서 `Entity` 제거한 짧은 이름 (`UserEntity` → `User`)
 
 ### Hard Rules
 
-- **Unique must use `@Unique()` decorator** — `@Column({ unique: true })` is forbidden.
+- **Unique must use `@Unique()` decorator** — `@Column({unique: true})` is forbidden.
 - **Options on one line** — `@PrimaryColumn({...})`, `@Column({...})`, `@JoinColumn({...})` options always on a single line so `name/length/nullable/comment` are visible at a glance.
-- Always specify `@Entity({ name: 't_table', comment: '...' })`.
+- Always specify `@Entity({name: 't_table', comment: '...'})`.
 
 ### Basic Entity Template
 
 ```ts
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity({ name: 't_table', comment: '(설명)' })
-export class Table {
-    @PrimaryColumn({ name: 'table_id', length: 32, comment: 'PK', primaryKeyConstraintName: 'PK_Table' })
+@Entity({name: 't_table', comment: '(설명)'})
+export class TableEntity {
+    @PrimaryColumn({name: 'table_id', length: 32, comment: 'PK', primaryKeyConstraintName: 'PK_Table'})
     table_id: string;
 
-    @Column({ name: 'name', length: 30, nullable: false, comment: '이름' })
+    @Column({name: 'name', length: 30, nullable: false, comment: '이름'})
     name: string;
 }
 ```
@@ -175,12 +184,12 @@ export class Table {
 ### Unique Constraint
 
 ```ts
-@Entity({ name: 't_user', comment: '회원 정보' })
+@Entity({name: 't_user', comment: '회원 정보'})
 @Unique('Unique_User_loginId', ['login_id'])
 @Unique('Unique_User_nickname', ['nickname'])
 // composite:
 @Unique('Unique_User_loginIdAndstateId', ['login_id', 'state_id'])
-export class User { ... }
+export class UserEntity {...}
 ```
 
 ### Index
@@ -189,7 +198,7 @@ export class User { ... }
 @Index('Index_Auth_Order', ['order'])
 // composite:
 @Index('Index_User_stateIdAndcreateAt', ['state_id', 'create_at'])
-export class Auth { ... }
+export class AuthEntity {...}
 ```
 
 ### Foreign Key
@@ -198,19 +207,20 @@ Use `@ManyToOne()` + `@JoinColumn()` with explicit `foreignKeyConstraintName`. O
 
 ```ts
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Unique } from 'typeorm';
+import { AuthEntity } from './auth.entity';
 
-@Entity({ name: 't_user', comment: '회원 정보' })
+@Entity({name: 't_user', comment: '회원 정보'})
 @Unique('Unique_User_loginId', ['login_id'])
 @Unique('Unique_User_nickname', ['nickname'])
-export class User {
-    @PrimaryColumn({ name: 'user_id', length: 32, comment: '회원 ID', primaryKeyConstraintName: 'PK_User' })
+export class UserEntity {
+    @PrimaryColumn({name: 'user_id', length: 32, comment: '회원 ID', primaryKeyConstraintName: 'PK_User'})
     user_id: string;
 
-    @ManyToOne(() => Auth, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'auth_id', referencedColumnName: 'auth_id', foreignKeyConstraintName: 'User_FK_Auth' })
+    @ManyToOne(() => AuthEntity, {nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE'})
+    @JoinColumn({name: 'auth_id', referencedColumnName: 'auth_id', foreignKeyConstraintName: 'User_FK_Auth'})
     auth_id: string;
 
-    @Column({ name: 'login_id', length: 30, nullable: false, comment: '로그인 ID' })
+    @Column({name: 'login_id', length: 30, nullable: false, comment: '로그인 ID'})
     login_id: string;
 }
 ```
@@ -222,12 +232,12 @@ Use `@BeforeInsert` / `@BeforeUpdate` — do not use TypeORM `@CreateDateColumn`
 ```ts
 import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 
-@Entity({ name: 't_user', comment: '회원 정보' })
-export class User {
-    @Column({ name: 'create_at', type: 'timestamp', nullable: false, comment: '생성일' })
+@Entity({name: 't_user', comment: '회원 정보'})
+export class UserEntity {
+    @Column({name: 'create_at', type: 'timestamp', nullable: false, comment: '생성일'})
     create_at: Date;
 
-    @Column({ name: 'update_at', type: 'timestamp', nullable: false, comment: '수정일' })
+    @Column({name: 'update_at', type: 'timestamp', nullable: false, comment: '수정일'})
     update_at: Date;
 
     @BeforeInsert()
@@ -248,7 +258,7 @@ export class User {
 
 - Validation errors always use the key `validationErrors` (array of `ValidationErrorDto`) — consistent across `ValidationPipe.exceptionFactory` and manual throws.
 - `createValidationError(property, message)` from `@root/common/utils/validation` builds `ValidationErrorDto[]`.
-- Throw: `new HttpException({ message, validationErrors }, HttpStatus.BAD_REQUEST)`
+- Throw: `new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST)`
 - MySQL duplicate key errors (errno 1062) are caught in repositories and converted to 400 responses using the constraint name string (e.g. `'Unique_User_nickname'`).
 
 ## Adding a New Domain
@@ -264,5 +274,5 @@ export class User {
 - [ ] Shared DTO/schema types in `src/common/dto/`
 - [ ] `validationErrors` key used consistently in all throws (global pipe + manual)
 - [ ] Every Entity has explicit PK / UK / IDX / FK constraint names
-- [ ] Unique constraints use `@Unique()` decorator, not `@Column({ unique: true })`
-- [ ] FK defined with `@ManyToOne` + `@JoinColumn({ foreignKeyConstraintName })`
+- [ ] Unique constraints use `@Unique()` decorator, not `@Column({unique: true})`
+- [ ] FK defined with `@ManyToOne` + `@JoinColumn({foreignKeyConstraintName})`

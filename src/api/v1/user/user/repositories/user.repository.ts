@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FindManyOptions, Repository } from 'typeorm';
-import { User } from '../../entities/user.entity';
+import { UserEntity } from '../../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindUserType, UserRepositoryInterface } from '../interfaces/user.repository.interface';
 import { ValidationErrorDto } from '@root/common/dto/global.result.dto';
@@ -10,9 +10,9 @@ import { createValidationError } from '@root/common/utils/validation';
 @Injectable()
 export class UserRepository implements UserRepositoryInterface {
     constructor(
-        @InjectRepository(User)
-        private readonly repository: Repository<User>
-    ) {}
+        @InjectRepository(UserEntity)
+        private readonly repository: Repository<UserEntity>
+    ) { }
 
     /**
      * 회원 수
@@ -21,13 +21,13 @@ export class UserRepository implements UserRepositoryInterface {
      * @param option 
      * @returns 
      */
-    async getCount(type: 'login_id' | 'nickname', option: FindManyOptions<User>): Promise<void> {
+    async getCount(type: 'login_id' | 'nickname', option: FindManyOptions<UserEntity>): Promise<void> {
         try {
             const count = await this.repository.count(option);
             if (count > 0) {
                 const typeName: string = type === 'login_id' ? '아이디' : '닉네임';
                 const validationErrors = createValidationError(type, `이미 사용중인 ${typeName}입니다.`);
-                throw new HttpException({message: `이미 사용중인 ${typeName}입니다.`, validationErrors}, HttpStatus.BAD_REQUEST);
+                throw new HttpException({ message: `이미 사용중인 ${typeName}입니다.`, validationErrors }, HttpStatus.BAD_REQUEST);
             }
         } catch (error) {
             throw error;
@@ -55,9 +55,9 @@ export class UserRepository implements UserRepositoryInterface {
                 , s.state_name 
                 , s.login_able_yn 
             `);
-            builder.innerJoin('t_state', 's', 'u.state_id = s.state_id and s.state_id = :state_id', {state_id: 'DONE'});
+            builder.innerJoin('t_state', 's', 'u.state_id = s.state_id and s.state_id = :state_id', { state_id: 'DONE' });
             builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
-            builder.where('u.login_id = :login_id', {login_id});
+            builder.where('u.login_id = :login_id', { login_id });
             return builder.getRawOne<FindUserType>();
         } catch (error) {
             throw error;
@@ -70,18 +70,18 @@ export class UserRepository implements UserRepositoryInterface {
      * @param dto 
      * @returns 
      */
-    async sign(user: User): Promise<void> {
+    async sign(user: UserEntity): Promise<void> {
         try {
             await this.repository.insert(user);
         } catch (error) {
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
                 const message: string = '이미 사용중인 닉네임입니다.';
                 const validationErrors: Array<ValidationErrorDto> = createValidationError('nickname', message);
-                throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
+                throw new HttpException({ message, validationErrors }, HttpStatus.BAD_REQUEST);
             } else if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_loginId') !== -1) {
                 const message: string = '이미 사용중인 아이디입니다.';
                 const validationErrors: Array<ValidationErrorDto> = createValidationError('login_id', message);
-                throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
+                throw new HttpException({ message, validationErrors }, HttpStatus.BAD_REQUEST);
             } else {
                 throw error;
             }
@@ -101,7 +101,7 @@ export class UserRepository implements UserRepositoryInterface {
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
                 const message: string = '이미 사용중인 닉네임입니다.';
                 const validationErrors: Array<ValidationErrorDto> = createValidationError('nickname', message);
-                throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
+                throw new HttpException({ message, validationErrors }, HttpStatus.BAD_REQUEST);
             } else {
                 throw error;
             }
@@ -116,15 +116,15 @@ export class UserRepository implements UserRepositoryInterface {
      */
     async patchNickname(user_id: string, nickname: string): Promise<void> {
         try {
-            await this.repository.update(user_id, {nickname});
+            await this.repository.update(user_id, { nickname });
         } catch (error) {
             if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_nickname') !== -1) {
                 const message: string = '이미 사용중인 닉네임입니다.';
                 const validationErrors: Array<ValidationErrorDto> = createValidationError('nickname', message);
-                throw new HttpException({message, validationErrors}, HttpStatus.BAD_REQUEST);
+                throw new HttpException({ message, validationErrors }, HttpStatus.BAD_REQUEST);
             } else {
                 const message: string = '요청이 실패했습니다. 관리자에게 문의해주세요.';
-                throw new HttpException({message}, HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new HttpException({ message }, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
     }
@@ -136,7 +136,7 @@ export class UserRepository implements UserRepositoryInterface {
      */
     async leave(user_id: string): Promise<void> {
         try {
-            await this.repository.update(user_id, {state_id: 'LEAVE'});
+            await this.repository.update(user_id, { state_id: 'LEAVE' });
         } catch (error) {
             throw error;
         }

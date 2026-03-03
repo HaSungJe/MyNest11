@@ -1,4 +1,4 @@
-import { UserLogin } from "../../entities/user-login.entity";
+import { UserLoginEntity } from "../../entities/user-login.entity";
 
 export type LoginUserDataType = {
     user_id: string;
@@ -22,7 +22,7 @@ export interface UserLoginRepositoryInterface {
      * 
      * @param login 
      */
-    login(login: UserLogin): Promise<void>;
+    login(login: UserLoginEntity): Promise<void>;
 
     /**
      * 로그인키 재발급
@@ -30,5 +30,5 @@ export interface UserLoginRepositoryInterface {
      * @param user_login_id 
      * @param login 
      */
-    refresh(user_login_id: string, login: UserLogin): Promise<void>;
+    refresh(user_login_id: string, login: UserLoginEntity): Promise<void>;
 }

@@ -7,10 +7,10 @@ import { PassportJwtAuthModule } from '@root/guards/passport.jwt.auth/passport.j
 import { AdminUserController } from './admin/admin.user.controller';
 import { AdminUserService } from './admin/admin.user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
-import { State } from './entities/state.entity';
-import { Auth } from './entities/auth.entity';
-import { UserLogin } from './entities/user-login.entity';
+import { UserEntity } from './entities/user.entity';
+import { StateEntity } from './entities/state.entity';
+import { AuthEntity } from './entities/auth.entity';
+import { UserLoginEntity } from './entities/user-login.entity';
 import { UserRepository } from './user/repositories/user.repository';
 import { UserLoginRepository } from './user/repositories/user-login.repository';
 import { AdminUserRepository } from './admin/repositories/admin.user.repository';
@@ -21,7 +21,12 @@ import { AdminUserRepository } from './admin/repositories/admin.user.repository'
 @Module({
     imports: [
         TypeORMModule,
-        TypeOrmModule.forFeature([User, State, Auth, UserLogin]),
+        TypeOrmModule.forFeature([
+            UserEntity,
+            StateEntity,
+            AuthEntity,
+            UserLoginEntity
+        ]),
         PassportJwtAuthModule
     ],
     controllers: [UserController, AdminUserController],
@@ -43,4 +48,4 @@ import { AdminUserRepository } from './admin/repositories/admin.user.repository'
     ],
 })
 
-export class UserModule {}
+export class UserModule { }

@@ -5,9 +5,9 @@ import { Transactional } from 'typeorm-transactional';
 import { ForbiddenException, HttpException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginDto, LoginResultDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { UserLogin } from '../entities/user-login.entity';
+import { UserLoginEntity } from '../entities/user-login.entity';
 import { SignDto } from './dto/sign.dto';
-import { User } from '../entities/user.entity';
+import { UserEntity } from '../entities/user.entity';
 import { CheckLoginIdDto } from './dto/check.login-id.dto';
 import { CheckNicknameDto } from './dto/check.nickname.dto';
 import { ApiBadRequestResultDto, ApiFailResultDto, ValidationErrorDto } from '@root/common/dto/global.result.dto';
@@ -25,7 +25,7 @@ export class UserService {
         private readonly userRepository: UserRepositoryInterface,
         @Inject(USER_LOGIN_REPOSITORY)
         private readonly userLoginRepository: UserLoginRepositoryInterface,
-    ) {}
+    ) { }
 
     /**
      * 로그인
@@ -56,7 +56,7 @@ export class UserService {
             id: userLoginId,
             user_id: user.user_id,
             auth_id: user.auth_id
-        }, {expiresIn: '90d'});
+        }, { expiresIn: '90d' });
         const refreshTokenDecode = await this.jwtService.decode(refreshToken);
         const refreshTokenIAT = new Date(refreshTokenDecode['iat'] * 1000);
         const refreshTokenEXP = new Date(refreshTokenDecode['exp'] * 1000);
@@ -66,13 +66,13 @@ export class UserService {
             type: 'access',
             user_id: user.user_id,
             auth_id: user.auth_id
-        }, {expiresIn: '20m'})
+        }, { expiresIn: '20m' })
         const accessTokenDecode = await this.jwtService.decode(accessToken);
         const accessTokenIAT = new Date(accessTokenDecode['iat'] * 1000);
         const accessTokenEXP = new Date(accessTokenDecode['exp'] * 1000);
 
         // 2-3. 로그인 이력 정보 생성
-        const login = new UserLogin();
+        const login = new UserLoginEntity();
         login.user_login_id = userLoginId;
         login.user_id = user.user_id;
         login.refresh_token = refreshToken;
@@ -81,7 +81,7 @@ export class UserService {
         login.refresh_token_end_dt = refreshTokenEXP;
         login.access_token_start_dt = accessTokenIAT;
         login.access_token_end_dt = accessTokenEXP;
-    
+
         // 2-2. 앱 로그인 처리
         login.ip = dto.ip;
         login.agent = dto.agent;
@@ -93,11 +93,11 @@ export class UserService {
         // 3. 로그인
         try {
             await this.userLoginRepository.login(login);
-            return { 
-                refresh_token: refreshToken, 
-                access_token: accessToken, 
-                refresh_token_end_dt: refreshTokenEXP, 
-                access_token_end_dt: accessTokenEXP 
+            return {
+                refresh_token: refreshToken,
+                access_token: accessToken,
+                refresh_token_end_dt: refreshTokenEXP,
+                access_token_end_dt: accessTokenEXP
             }
         } catch (error) {
             throw new HttpException({message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -142,7 +142,7 @@ export class UserService {
                 id: refreshTokenPayload?.id,
                 user_id: login.user_id,
                 auth_id: login.auth_id
-            }, {expiresIn: '90d'});
+            }, { expiresIn: '90d' });
             const refreshTokenDecode = await this.jwtService.decode(refreshToken);
             const refreshTokenIAT = new Date(refreshTokenDecode['iat'] * 1000);
             const refreshTokenEXP = new Date(refreshTokenDecode['exp'] * 1000);
@@ -152,13 +152,13 @@ export class UserService {
                 type: 'access',
                 user_id: login.user_id,
                 auth_id: login.auth_id
-            }, {expiresIn: '20m'})
+            }, { expiresIn: '20m' })
             const accessTokenDecode = await this.jwtService.decode(accessToken);
             const accessTokenIAT = new Date(accessTokenDecode['iat'] * 1000);
             const accessTokenEXP = new Date(accessTokenDecode['exp'] * 1000);
 
             // 3. 로그인키 재발급
-            const refresh = new UserLogin();
+            const refresh = new UserLoginEntity();
             refresh.access_token = accessToken;
             refresh.access_token_start_dt = accessTokenIAT;
             refresh.access_token_end_dt = accessTokenEXP;
@@ -168,11 +168,11 @@ export class UserService {
 
             try {
                 await this.userLoginRepository.refresh(login.user_login_id, refresh);
-                return { 
-                    refresh_token: refreshToken, 
-                    access_token: accessToken, 
-                    refresh_token_end_dt: refreshTokenEXP, 
-                    access_token_end_dt: accessTokenEXP 
+                return {
+                    refresh_token: refreshToken,
+                    access_token: accessToken,
+                    refresh_token_end_dt: refreshTokenEXP,
+                    access_token_end_dt: accessTokenEXP
                 }
             } catch (error) {
                 throw new HttpException({message: '요청이 실패했습니다. 관리자에게 문의해주세요.'}, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -197,7 +197,7 @@ export class UserService {
         }
 
         try {
-            const user = new User();
+            const user = new UserEntity();
             user.user_id = UUID().replaceAll('-', '');
             user.login_id = dto.login_id;
             user.login_pw = await getBcrypt(dto.login_pw);
@@ -219,7 +219,7 @@ export class UserService {
      */
     async checkLoginId(dto: CheckLoginIdDto): Promise<void | ApiBadRequestResultDto> {
         try {
-            await this.userRepository.getCount('login_id', { where: { login_id: dto.login_id } });
+            await this.userRepository.getCount('login_id', {where: {login_id: dto.login_id}});
         } catch (error) {
             throw error;
         }
@@ -233,7 +233,7 @@ export class UserService {
      */
     async checkNickname(dto: CheckNicknameDto): Promise<void | ApiBadRequestResultDto> {
         try {
-            await this.userRepository.getCount('nickname', { where: { nickname: dto.nickname } });
+            await this.userRepository.getCount('nickname', {where: {nickname: dto.nickname}});
         } catch (error) {
             throw error;
         }
@@ -269,7 +269,7 @@ export class UserService {
         }
 
         try {
-            const user = new User();
+            const user = new UserEntity();
             user.login_pw = await getBcrypt(dto.login_pw);
             user.name = dto.name;
             user.nickname = dto.nickname;
