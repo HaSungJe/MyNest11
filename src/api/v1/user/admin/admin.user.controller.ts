@@ -4,8 +4,8 @@ import { AdminUserService } from "./admin.user.service";
 import { AdminUserListDto, AdminUserListResultDto } from "./dto/list.dto";
 import { ApiFailResultDto } from "@root/common/dto/global.result.dto";
 import { PassportJwtAuthGuard } from "@root/guards/passport.jwt.auth/passport.jwt.auth.guard";
-import { AuthGuard } from "@root/guards/auth/auth.guard";
-import { Auths } from "@root/guards/auth/auth.decorator";
+import { RolesGuard } from "@root/guards/roles/roles.guard";
+import { Roles } from "@root/guards/roles/roles.decorator";
 
 @ApiTags('회원 관리')
 @Controller('api/v1/admin/user')
@@ -22,8 +22,8 @@ export class AdminUserController {
      * @returns 
      */
     @Get('/list')
-    @UseGuards(PassportJwtAuthGuard, AuthGuard)
-    @Auths('ADMIN, SUPER_ADMIN')
+    @UseGuards(PassportJwtAuthGuard, RolesGuard)
+    @Roles('ADMIN, SUPER_ADMIN')
     @ApiOperation({summary: '회원 목록'})
     @ApiOkResponse({type: AdminUserListResultDto})
     @ApiInternalServerErrorResponse({type: ApiFailResultDto})
