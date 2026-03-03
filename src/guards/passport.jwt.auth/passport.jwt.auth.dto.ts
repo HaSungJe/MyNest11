@@ -1,4 +1,3 @@
-import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 
 // 로그인한 회원의 정보
