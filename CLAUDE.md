@@ -142,7 +142,7 @@ import { createValidationError } from '@root/common/utils/validation';
 | PK | `PK_<EntityName>` | `PK_User`, `PK_Auth` |
 | UK | `Unique_<EntityName>_<ColumnName>` | `Unique_User_loginId` |
 | UK (composite) | `Unique_<EntityName>_<ColA>And<ColB>` | `Unique_User_loginIdAndstateId` |
-| IDX | `Index_<EntityName>_<ColumnName>` | `Index_Auth_Order` |
+| IDX | `Index_<EntityName>_<ColumnName>` | `Index_Auth_order` |
 | IDX (composite) | `Index_<EntityName>_<ColA>And<ColB>` | `Index_User_stateIdAndcreateAt` |
 | FK | `FK_<ChildEntity>_<ParentEntity>` | `FK_User_Auth`, `FK_UserLogin_User` |
 
