@@ -15,7 +15,16 @@ export class Auth {
 
     @Column({ name: 'level', comment: '등급', nullable: false, default: 1 })
     level: number;
-
-    @Column({ name: 'order', comment: '정렬값', nullable: false, default: 1 })
-    order: number;
 }
+
+/**
+    insert into t_auth (
+        auth_id, auth_name, level, order
+    ) values (
+        'SUPER_ADMIN', '총괄관리자, 999
+    ), (
+        'ADMIN', '관리자', 998
+    ), (
+        'USER', '일반사용자', 1
+    );
+ */
