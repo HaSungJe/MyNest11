@@ -6,11 +6,11 @@ import { UserEntity } from "./user.entity";
  */
 @Entity({ name: 't_user_login', comment: '회원 로그인정보' })
 export class UserLoginEntity {
-    @PrimaryColumn({name: 'user_login_id', length: 32, comment: '회원 ID', primaryKeyConstraintName: 'PK_User'})
+    @PrimaryColumn({name: 'user_login_id', length: 32, comment: '회원 ID', primaryKeyConstraintName: 'PK_UserLogin'})
     user_login_id: string;
 
     @ManyToOne(() => UserEntity, {nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE'})
-    @JoinColumn({name: 'user_id', referencedColumnName: 'user_id', foreignKeyConstraintName: 'UserLogin_FK_User'})
+    @JoinColumn({name: 'user_id', referencedColumnName: 'user_id', foreignKeyConstraintName: 'FK_UserLogin_User'})
     user_id: string;
 
     @Column({name: 'refresh_token', type: 'text', nullable: false, comment: 'Refresh Token'})

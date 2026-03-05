@@ -13,11 +13,11 @@ export class UserEntity {
     user_id: string;
 
     @ManyToOne(() => StateEntity, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'state_id', referencedColumnName: 'state_id', foreignKeyConstraintName: 'User_FK_State' })
+    @JoinColumn({ name: 'state_id', referencedColumnName: 'state_id', foreignKeyConstraintName: 'FK_User_State' })
     state_id: string;
 
     @ManyToOne(() => AuthEntity, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'auth_id', referencedColumnName: 'auth_id', foreignKeyConstraintName: 'User_FK_Auth' })
+    @JoinColumn({ name: 'auth_id', referencedColumnName: 'auth_id', foreignKeyConstraintName: 'FK_User_Auth' })
     auth_id: string;
 
     @Column({ name: 'login_id', length: 30, nullable: false, comment: '로그인 ID' })
