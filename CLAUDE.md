@@ -24,7 +24,7 @@ npx jest --testPathPattern=user     # Run tests matching a pattern (single file/
 ## ⚠️ 주의사항
 
 - **`npm run lint` 및 `npm run format` 절대 실행 금지** — 실행 시 프로젝트 전체 파일의 들여쓰기/줄바꿈 포맷이 변경됨
-- 컴파일 오류 확인은 반드시 **`npm run build`** 만 사용할 것
+- **`npm run build` 실행 금지** — 빌드 확인은 사용자가 직접 수행
 
 ## Environment Variables (.env)
 
@@ -150,6 +150,23 @@ export class VisitRoundParamDto {
 async deleteVisitRound(@Param() param: VisitRoundParamDto): Promise<void> {
     await this.service.deleteVisitRound(param.visit_round_id);
 }
+```
+
+**컨트롤러 메서드 시그니처 — 파라미터는 반드시 한 줄로 작성**
+
+파라미터가 여러 개여도 멀티라인 금지. 한 줄로 이어서 작성한다.
+
+```ts
+// ✅ 올바른 패턴 — 한 줄
+async createVisitReserve(@DaylogPassportUser() user: DaylogPassportUserResultVo, @Body() body: CreateVisitReserveDto): Promise<void> {
+    await this.service.createVisitReserve(user, body);
+}
+
+// ❌ 금지 — 멀티라인
+async createVisitReserve(
+    @DaylogPassportUser() user: DaylogPassportUserResultVo,
+    @Body() body: CreateVisitReserveDto,
+): Promise<void> {
 
 // service
 async deleteVisitRound(visit_round_id: string): Promise<void> { ... }
@@ -255,6 +272,21 @@ async findById(visit_round_id: string): Promise<VisitRoundEntity | null> {
     return this.repository.findOne({where: {visit_round_id, is_delete: 0}});
 }
 ```
+
+### findOne / find 사용 시 loadRelationIds: true 필수
+
+엔티티에 `@ManyToOne` + `@JoinColumn`으로 선언된 컬럼(FK 컬럼)은 TypeORM `findOne` / `find` 기본 동작에서 값을 채우지 않아 `undefined`가 된다. **반드시 `loadRelationIds: true`를 지정**할 것.
+
+```ts
+// ✅ 올바른 패턴 — @ManyToOne 컬럼 값이 정상적으로 채워짐
+return await this.repository.findOne({where: {visit_reserve_id, daylog_user_seq}, loadRelationIds: true});
+
+// ❌ 금지 — visit_reserve_status_id, visit_round_id 등 @ManyToOne 컬럼이 undefined
+return await this.repository.findOne({where: {visit_reserve_id, daylog_user_seq}});
+```
+
+- `loadRelationIds: true` 는 관련 엔티티 전체를 로드하지 않고 FK ID 값(문자열/숫자)만 채움
+- `find`, `findOne`, `findAndCount` 모두 동일하게 적용
 
 ### 검색/정렬 조건은 메서드 내부에 인라인으로 작성
 
@@ -564,10 +596,13 @@ import { VisitRoundTimeSlotDto } from '../entities/visit-round.entity';
 @ApiUnauthorizedResponse({ type: ApiFailResultDto })         // JWT 가드 있을 때
 @ApiForbiddenResponse({ type: ApiFailResultDto })            // 권한 가드 있을 때
 @ApiNotFoundResponse({ type: ApiFailResultDto })             // NotFoundException 가능할 때
+@ApiConflictResponse({ type: ApiFailResultDto })             // 중복 데이터(errno 1062 → CONFLICT) 가능할 때
 @ApiInternalServerErrorResponse({ type: ApiFailResultDto })  // 항상
 ```
 
 ### 응답 코드 기준
+
+반환될 수 있는 **모든** 에러 코드를 빠짐없이 정의해야 한다.
 
 | 상황 | 데코레이터 |
 |------|-----------|
@@ -577,13 +612,14 @@ import { VisitRoundTimeSlotDto } from '../entities/visit-round.entity';
 | JWT 없음 | `@ApiUnauthorizedResponse({ type: ApiFailResultDto })` |
 | 권한 없음 | `@ApiForbiddenResponse({ type: ApiFailResultDto })` |
 | 리소스 없음 | `@ApiNotFoundResponse({ type: ApiFailResultDto })` |
+| 중복 데이터 (errno 1062 → CONFLICT) | `@ApiConflictResponse({ type: ApiFailResultDto })` |
 | 서버 오류 | `@ApiInternalServerErrorResponse({ type: ApiFailResultDto })` |
 
 ### import 경로
 
 ```ts
 import {
-    ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiForbiddenResponse,
+    ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiConflictResponse, ApiForbiddenResponse,
     ApiInternalServerErrorResponse, ApiNoContentResponse, ApiNotFoundResponse,
     ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -592,64 +628,53 @@ import { ApiBadRequestResultDto, ApiFailResultDto } from '@root/common/dto/globa
 
 ## Error Handling
 
-- Validation errors always use the key `validationErrors` (array of `ValidationErrorDto`) — consistent across `ValidationPipe.exceptionFactory` and manual throws.
-- `createValidationError(property, message)` from `@root/common/utils/validation` builds `ValidationErrorDto[]`.
-- MySQL duplicate key errors (errno 1062) are caught in repositories and converted to 400 responses using the constraint name string.
+- Validation errors (`validationErrors` key) — `ValidationPipe.exceptionFactory` 및 **service에서 수동 throw 시**에만 사용.
+- `createValidationError(property, message)` from `@root/common/utils/validation` — **service에서만 사용**. repository에서는 사용 금지.
+- MySQL duplicate key errors (errno 1062) — repository catch 블록에서 처리. `{message}` 만 포함, `validationErrors` 없음.
 
 ### Duplicate Key (errno 1062) 처리 패턴
 
-repository의 `catch` 블록에서 `error.errno === 1062`를 확인하고, `error.sqlMessage`에서 constraint 이름을 추출하여 적절한 에러 메시지를 반환한다.
+repository의 `catch` 블록에서 `error.errno === 1062 && error.sqlMessage.indexOf('constraint명') !== -1` 조합으로 확인한다.
 
 **메시지 규칙**
 
-| Unique 종류 | 메시지 형식 | 기준 |
-|------------|------------|------|
-| 단일 컬럼 | `이미 사용중인 {컬럼 comment}입니다.` | 해당 컬럼의 `comment` |
-| 복합 컬럼 | `이미 등록된 {테이블 comment}입니다.` | 해당 테이블의 `comment` |
+| Unique 종류 | 상태코드 | 메시지 형식 | 기준 |
+|------------|---------|------------|------|
+| 단일 컬럼 (입력값 중복) | 400 BAD_REQUEST | `이미 사용중인 {컬럼 comment}입니다.` | 해당 컬럼의 `comment` |
+| 복합 컬럼 (비즈니스 중복) | 409 CONFLICT | `이미 등록된 {테이블 comment}입니다.` 또는 업무 맥락에 맞는 메시지 | 테이블 comment / 업무 맥락 |
 
 ```ts
 // 엔티티 예시
 @Entity({name: 't_user', comment: '회원'})
 @Unique('Unique_User_loginId', ['login_id'])
-@Unique('Unique_User_nameAndtel', ['name', 'tel'])
+@Unique('Unique_VisitReserve_duplicateKey', ['duplicate_key'])
 export class UserEntity {
     @Column({name: 'login_id', comment: '아이디'})
     login_id: string;
-    // ...
 }
 
-// repository catch 블록
+// repository catch 블록 — createValidationError 사용 금지, {message}만 반환
 } catch (error) {
-    if (error.errno === 1062) {
-        const match = error.sqlMessage?.match(/for key '(.+?)'/);
-        const keyName = match ? match[1] : '';
-
-        // 단일 컬럼 Unique → "이미 사용중인 {컬럼 comment}입니다."
-        if (keyName === 'Unique_User_loginId') {
-            const message = '이미 사용중인 아이디입니다.';
-            throw new HttpException({message, validationErrors: createValidationError('login_id', message)}, HttpStatus.BAD_REQUEST);
-        }
-
-        // 복합 컬럼 Unique → "이미 등록된 {테이블 comment}입니다."
-        if (keyName === 'Unique_User_nameAndtel') {
-            const message = '이미 등록된 회원입니다.';
-            throw new HttpException({message, validationErrors: createValidationError('name', message)}, HttpStatus.BAD_REQUEST);
-        }
+    if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_User_loginId') !== -1) {
+        throw new HttpException({message: '이미 사용중인 아이디입니다.'}, HttpStatus.BAD_REQUEST);
+    } else if (error.errno === 1062 && error.sqlMessage.indexOf('Unique_VisitReserve_duplicateKey') !== -1) {
+        throw new HttpException({message: '이미 신청한 내역이 존재합니다.'}, HttpStatus.CONFLICT);
+    } else {
+        throw error;
     }
-    throw error;
 }
 ```
 
-- constraint 이름은 `error.sqlMessage`에서 `/for key '(.+?)'/` 정규식으로 추출
-- `validationErrors`의 property는 복합 Unique의 경우 첫 번째 컬럼명 사용
-- 매핑되지 않은 Unique 오류는 그대로 `throw error`로 재던짐
+- constraint 이름 확인은 `error.sqlMessage.indexOf('constraint명') !== -1` 사용 (정규식 금지)
+- repository에서는 `{message}` 만 포함 — `validationErrors` 추가 금지
+- 매핑되지 않은 Unique 오류는 `else { throw error; }` 로 재던짐
 
-### throw 패턴 — 반드시 1줄로 작성
+### throw 패턴
 
-메시지 문자열이 `message`와 `createValidationError` 양쪽에서 중복되므로, **반드시 `const message`로 먼저 선언**한 뒤 한 줄로 throw 할 것.
+**Service (수동 유효성 오류)** — `validationErrors` 포함, `const message` 먼저 선언 후 1줄 throw:
 
 ```ts
-// ✅ 올바른 패턴
+// ✅ 올바른 패턴 — service
 const message = '운영 요일을 선택해주세요.';
 throw new HttpException({message, validationErrors: createValidationError('weekdays', message)}, HttpStatus.BAD_REQUEST);
 
@@ -658,6 +683,61 @@ throw new HttpException(
     {message: '운영 요일을 선택해주세요.', validationErrors: createValidationError('weekdays', '운영 요일을 선택해주세요.')},
     HttpStatus.BAD_REQUEST,
 );
+```
+
+**Repository (errno 1062 처리)** — `{message}` 만, `validationErrors` 금지:
+
+```ts
+// ✅ 올바른 패턴 — repository
+throw new HttpException({message: '이미 사용중인 아이디입니다.'}, HttpStatus.BAD_REQUEST);
+
+// ❌ 금지 — repository에서 createValidationError 사용
+throw new HttpException({message, validationErrors: createValidationError('login_id', message)}, HttpStatus.BAD_REQUEST);
+```
+
+## Agent Workflow (plan-agent / work-agent)
+
+이 프로젝트는 **계획 전용 에이전트(plan-agent)** 와 **구현 전용 에이전트(work-agent)** 를 분리하여 사용한다.
+
+### 에이전트 정의 파일
+
+```
+.claude/agents/plan-agent.md   # plan-agent 시스템 프롬프트
+.claude/agents/work-agent.md   # work-agent 시스템 프롬프트
+```
+
+### 파일 구조
+
+```
+.claude/plans/<domain>/
+├── request/
+│   └── plan-N-request.md   # 사용자가 직접 작성하는 요구사항 (자유 형식)
+└── work/
+    └── plan-N-work.md      # plan-agent가 생성하는 구현 계획 (구조화된 형식)
+```
+
+### 워크플로우
+
+```
+1. 사용자 → .claude/plans/<domain>/request/plan-N-request.md 작성 (요구사항 기술)
+2. plan-agent에게 "plan-N-request.md 읽고 계획 만들어줘" 요청
+3. plan-agent → .claude/plans/<domain>/work/plan-N-work.md 생성
+4. 사용자 → plan-N-work.md 검토 후 승인
+5. work-agent에게 "plan-N-work.md 실행해줘" 요청
+6. work-agent → 계획에 따라 코드 구현
+```
+
+### 파일 명명 규칙
+
+- request 파일: `plan-N-request.md` (N은 순번, 예: `plan-3-request.md`)
+- work 파일: `plan-N-work.md` (request 번호와 동일, 예: `plan-3-work.md`)
+- 사용자가 직접 구두로 요청 시 request 파일 없이 work 파일만 생성 가능
+
+### 에이전트 메모리
+
+```
+.claude/agent-memory/plan-agent/MEMORY.md   # plan-agent 세션 간 기억
+.claude/agent-memory/work-agent/MEMORY.md   # work-agent 세션 간 기억
 ```
 
 ## Adding a New Domain

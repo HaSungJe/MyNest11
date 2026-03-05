@@ -18,18 +18,17 @@ export class ValidationErrorDto {
  * API 요청 실패 반환 - 400
  */
 export class ApiBadRequestResultDto {
-    @ApiProperty({description: '메세지', required: true})
+    @ApiProperty({ description: '메세지', required: true })
     message: string;
 
-    @ApiProperty({description: '에러 목록', isArray: true, type: () => ValidationErrorDto, required: false})
+    @ApiProperty({ description: '에러 목록', isArray: true, type: () => ValidationErrorDto, required: false })
     validationErrors?: Array<ValidationErrorDto>;
 }
 
 /**
- * API 요청 실패 반환 - 401, 403, 500, 502
+ * API 요청 실패 반환 - 400 포함 모든 에러상황
  */
 export class ApiFailResultDto {
-    @ApiProperty({description: '메세지', required: true})
+    @ApiProperty({ description: '메세지', required: true })
     message: string;
 }
-
