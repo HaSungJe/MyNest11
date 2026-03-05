@@ -695,50 +695,11 @@ throw new HttpException({message: '이미 사용중인 아이디입니다.'}, Ht
 throw new HttpException({message, validationErrors: createValidationError('login_id', message)}, HttpStatus.BAD_REQUEST);
 ```
 
-## Agent Workflow (plan-agent / work-agent)
-
-이 프로젝트는 **계획 전용 에이전트(plan-agent)** 와 **구현 전용 에이전트(work-agent)** 를 분리하여 사용한다.
-
-### 에이전트 정의 파일
-
-```
-.claude/agents/plan-agent.md   # plan-agent 시스템 프롬프트
-.claude/agents/work-agent.md   # work-agent 시스템 프롬프트
-```
-
-### 파일 구조
-
-```
-.claude/plans/<domain>/
-├── request/
-│   └── plan-N-request.md   # 사용자가 직접 작성하는 요구사항 (자유 형식)
-└── work/
-    └── plan-N-work.md      # plan-agent가 생성하는 구현 계획 (구조화된 형식)
-```
-
-### 워크플로우
-
-```
-1. 사용자 → .claude/plans/<domain>/request/plan-N-request.md 작성 (요구사항 기술)
-2. plan-agent에게 "plan-N-request.md 읽고 계획 만들어줘" 요청
-3. plan-agent → .claude/plans/<domain>/work/plan-N-work.md 생성
-4. 사용자 → plan-N-work.md 검토 후 승인
-5. work-agent에게 "plan-N-work.md 실행해줘" 요청
-6. work-agent → 계획에 따라 코드 구현
-```
-
 ### 파일 명명 규칙
 
 - request 파일: `plan-N-request.md` (N은 순번, 예: `plan-3-request.md`)
 - work 파일: `plan-N-work.md` (request 번호와 동일, 예: `plan-3-work.md`)
 - 사용자가 직접 구두로 요청 시 request 파일 없이 work 파일만 생성 가능
-
-### 에이전트 메모리
-
-```
-.claude/agent-memory/plan-agent/MEMORY.md   # plan-agent 세션 간 기억
-.claude/agent-memory/work-agent/MEMORY.md   # work-agent 세션 간 기억
-```
 
 ## Adding a New Domain
 
