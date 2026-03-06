@@ -37,7 +37,7 @@ export class UserLoginEntity {
     @Column({name: 'ip', nullable: false, comment: 'ip', length: 30})
     ip: string;
 
-    @Column({name: 'agent', nullable: true, comment: 'Agent', length: 100})
+    @Column({name: 'agent', nullable: true, comment: 'Agent', length: 255})
     agent: string;
 
     @Column({name: 'device_type', nullable: false, default: 'W', comment: '디바이스 종류. (W: 웹, M: 모바일)', length: 1})
