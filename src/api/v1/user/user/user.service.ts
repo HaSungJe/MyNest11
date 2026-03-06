@@ -128,14 +128,13 @@ export class UserService {
                 throw new UnauthorizedException({message: '올바르지 않은 인증정보입니다.'});
             }
 
-            const userLoginId: string = refreshTokenPayload?.id;
-            const login: LoginUserDataType = await this.userLoginRepository.getLoginInfo(userLoginId);
+            const login: LoginUserDataType = await this.userLoginRepository.getLoginInfo(dto.refresh_token);
             if (!login) {
                 throw new UnauthorizedException({message: '올바르지 않은 인증정보입니다.'});
             } else if (login.login_able_yn === 'N') {
                 throw new ForbiddenException({message: '사용이 정지된 계정입니다. 관리자에게 문의해주세요.'});
             }
-
+            
             // 2-1. Refresh Token 생성
             const refreshToken = this.jwtService.sign({
                 type: 'refresh',

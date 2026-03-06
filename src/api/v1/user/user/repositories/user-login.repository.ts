@@ -14,10 +14,10 @@ export class UserLoginRepository implements UserLoginRepositoryInterface {
     /**
      * 로그인 정보 확인
      * 
-     * @param userLoginId 
+     * @param refresh_token 
      * @returns 
      */
-    async getLoginInfo(userLoginId: string): Promise<LoginUserDataType | null> {
+    async getLoginInfo(refresh_token: string): Promise<LoginUserDataType | null> {
         const builder = this.repository.createQueryBuilder('l');
         builder.select(`
               l.user_id
@@ -31,7 +31,7 @@ export class UserLoginRepository implements UserLoginRepositoryInterface {
         builder.innerJoin('t_state', 's', 'u.state_id = s.state_id');
         builder.innerJoin('t_auth', 'a', 'u.auth_id = a.auth_id');
         builder.where(`l.use_yn = :use_yn`, { use_yn: 'Y' });
-        builder.andWhere('l.user_login_id = :user_login_id', { userLoginId })
+        builder.andWhere('l.refresh_token = :refresh_token', { refresh_token })
         builder.andWhere('now() < l.refresh_token_end_dt');
         return await builder.getRawOne<LoginUserDataType>();
     }
