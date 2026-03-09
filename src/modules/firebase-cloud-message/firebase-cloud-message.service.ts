@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const account_path = path.resolve(__dirname, '../../../../google-services.json');
+const account_path = path.resolve(__dirname, '../google-services.json');
 const account = JSON.parse(fs.readFileSync(account_path, 'utf-8'));
 
 @Injectable()
