@@ -25,6 +25,7 @@ src/
 
 - Entity: `*Entity` suffix. Constraint: `Entity` 제거한 짧은 이름
 - DTO: `*.dto.ts` / Utils: 전역 `src/common/utils/`, 도메인 `<domain>.util.ts`
+- **DTO 파일 합치기**: 같은 기능(query + result 등)의 DTO는 하나의 파일에 작성 (예: `get-blood-glucose.dto.ts`)
 - API route: `/api/v1/<domain>/...`
 - Path param: snake_case (`visit_round_id`), 전 레이어 통일
 - **`@Param()` DTO 필수** — `@Param('key')` 방식 금지
