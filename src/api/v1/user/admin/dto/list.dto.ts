@@ -14,6 +14,17 @@ export class AdminUserListDto extends PaginationDto {
 
     @ApiProperty({description: '상태 ID. (ALL: 전체, DONE: 정상, BLOCK: 정지, DELETE: 삭제)', required: false})
     state_id: string;
+
+    constructor(data: any = {}) {
+        super();
+        this.all_search_yn = ['Y', 'N'].includes(data['all_search_yn']) ? data['all_search_yn'] : 'N';
+        this.page = !isNaN(parseInt(data['page'])) ? parseInt(data['page']) : 1;
+        this.size = !isNaN(parseInt(data['size'])) ? parseInt(data['size']) : 20;
+        this.pageSize = !isNaN(parseInt(data['pageSize'])) ? parseInt(data['pageSize']) : 10;
+        this.search_type = data['search_type'] ? data['search_type'] : 'ALL';
+        this.search_value = data['search_value'] ? data['search_value'] : '';
+        this.state_id = data['state_id'] ? data['state_id'] : 'ALL';
+    }
 }
 
 /**

@@ -1,4 +1,4 @@
-import { PaginationResultDto } from "../dto/pagination.dto";
+import { PaginationResultDto } from '../dto/pagination.dto';
 
 /**
  * 페이징
@@ -14,7 +14,8 @@ export class Pagination {
     public limit: number; // Query용 limit 값
     public offset: number; // Query용 offset 값
 
-    constructor (data: any = {}) {
+    constructor(data: any = {}) {
+        this.all_search_yn = ['Y', 'N'].includes(data['all_search_yn']) ? data['all_search_yn'] : 'N';
         this.totalCount = !isNaN(parseInt(data['totalCount'])) ? parseInt(data['totalCount']) : 1;
         this.page = !isNaN(parseInt(data['page'])) ? parseInt(data['page']) : 1;
         this.size = !isNaN(parseInt(data['size'])) ? parseInt(data['size']) : 20;
@@ -28,12 +29,11 @@ export class Pagination {
         // 최대 페이지 수
         this.maxPage = Math.floor(this.totalCount / this.size);
         if (this.totalCount % this.size > 0) {
-            this.maxPage++; 
+            this.maxPage++;
         }
 
         // 페이지당 출력될 개수가 -1인 경우, 전체 출력
-        if (this.size === -1) {
-            this.all_search_yn = 'Y';
+        if (this.all_search_yn === 'Y') {
             this.page = 1;
             this.maxPage = 1;
             this.size = this.totalCount;
@@ -49,28 +49,25 @@ export class Pagination {
             this.page = this.maxPage;
         }
 
-        // mysql 검색용 limit 
+        // mysql 검색용 limit
         this.limit = this.size;
-        this.offset = ((this.page-1) * this.size);
+        this.offset = (this.page - 1) * this.size;
 
         // 노출할 페이지 목록 수
-        this.pageRange = {
-            start: 0,
-            end: 0
-        }
+        this.pageRange = { start: 0, end: 0 };
 
         this.pageRange.end = Math.floor(this.page / this.pageSize);
         if (this.page % this.pageSize > 0) {
             this.pageRange.end++;
         }
-        
+
         this.pageRange.end = this.pageRange.end * this.pageSize;
         this.pageRange.start = this.pageRange.end - (this.pageSize - 1);
         if (this.pageRange.end > this.maxPage) {
             this.pageRange.end = this.maxPage;
         }
     }
-    
+
     getPagination(): PaginationResultDto {
         return {
             all_search_yn: this.all_search_yn,
@@ -78,8 +75,8 @@ export class Pagination {
             page: this.page,
             maxPage: this.maxPage,
             pageRange: this.pageRange,
-            content_start_number: this.totalCount - ((this.page - 1) * this.size),
-            content_start_number_reverse: 1 + ((this.page-1) * this.size)
-        }
+            content_start_number: this.totalCount - (this.page - 1) * this.size,
+            content_start_number_reverse: 1 + (this.page - 1) * this.size,
+        };
     }
 }

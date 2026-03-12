@@ -55,13 +55,13 @@ async getVisitRoundCount(dto: VisitRoundListDto | null): Promise<number> {
 export class VisitRoundListDto extends PaginationDto {
     weekday?: number;
     is_holiday_open?: string;   // 'ALL' | '0' | '1'
-    SORT_WEEKDAY?: 'ASC' | 'DESC';
+    sort_weekday?: 'ASC' | 'DESC';
 
     constructor(data: any = {}) {
         super();
         this.weekday = !isNaN(parseInt(data['weekday'])) ? parseInt(data['weekday']) : 127;
         this.is_holiday_open = ['ALL', '0', '1'].includes(data['is_holiday_open']) ? data['is_holiday_open'] : 'ALL';
-        this.SORT_WEEKDAY = data['SORT_WEEKDAY'] === 'DESC' ? 'DESC' : 'ASC';
+        this.sort_weekday = data['sort_weekday'] === 'DESC' ? 'DESC' : 'ASC';
     }
 }
 
@@ -84,7 +84,7 @@ async getVisitRoundList(@Query() query: VisitRoundListDto): Promise<VisitRoundLi
 ```ts
 const totalCount = await this.repository.getVisitRoundCount(null);
 const count = await this.repository.getVisitRoundCount(dto);
-const pagination = new Pagination({totalCount: count, page: dto.page, size: dto.size, pageSize: dto.pageSize});
+const pagination = new Pagination({totalCount: count, page: dto.page, size: dto.size, pageSize: dto.pageSize, all_search_yn: dto.all_search_yn});
 const entities = await this.repository.getVisitRoundList(dto, pagination.limit, pagination.offset);
 
 return {list, totalCount, pagination: pagination.getPagination()};

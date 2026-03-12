@@ -41,6 +41,9 @@ export class PaginationResultDto {
  * 페이지정보 Dto
  */
 export class PaginationDto {
+    @ApiProperty({ description: '전체검색 여부(Y/N)', required: true })
+    all_search_yn: string;
+
     @ApiProperty({description: '페이지. 기본값: 1', required: false})
     page: number;
 

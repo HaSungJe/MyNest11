@@ -58,7 +58,7 @@ export class AdminUserRepository implements AdminUserRepositoryInterface {
             const count = await builder.getCount();
 
             // 2. 페이징
-            const pagination = new Pagination({ totalCount: count, ...dto });
+            const pagination = new Pagination({totalCount: count, page: dto.page, size: dto.size, pageSize: dto.pageSize, all_search_yn: dto.all_search_yn});
 
             // 3. 목록
             builder.select(`

@@ -45,11 +45,22 @@ src/
 - Query 파라미터: 컨트롤러에서 `new XxxDto(query)` 생성 후 전달
 - 서비스 4단계: `totalCount(null)` → `count(dto)` → `Pagination(count)` → list
 - Pagination 객체명은 항상 `pagination`
+- Pagination 생성 시 `all_search_yn` 반드시 포함:
+  ```typescript
+  const pagination = new Pagination({totalCount: count, page: dto.page, size: dto.size, pageSize: dto.pageSize, all_search_yn: dto.all_search_yn});
+  ```
 
 ## Query DTO 생성자 규칙
 
 - 생성자가 있는 Query DTO는 반드시 `constructor(data: any = {})` 형태로 선언
 - `data: any` 로만 선언 시 `class-transformer`(`plainToInstance`)가 인수 없이 호출하여 런타임 에러 발생
+- **`PaginationDto` extends 시** `super()` 외에 반드시 아래 4개 할당 추가 (미포함 시 `page` 등 `undefined` 발생):
+  ```typescript
+  this.all_search_yn = ['Y', 'N'].includes(data['all_search_yn']) ? data['all_search_yn'] : 'N';
+  this.page = !isNaN(parseInt(data['page'])) ? parseInt(data['page']) : 1;
+  this.size = !isNaN(parseInt(data['size'])) ? parseInt(data['size']) : 20;
+  this.pageSize = !isNaN(parseInt(data['pageSize'])) ? parseInt(data['pageSize']) : 10;
+  ```
 
 → 상세: [docs/repository.md](docs/repository.md)
 
@@ -86,6 +97,19 @@ src/
 - Scheduler: `<domain>.scheduler.ts`, plain provider (Symbol 불필요), `ScheduleModule.forRoot()` 중복 등록 금지
 - Auth: `PassportJwtAuthGuard` (JWT) + `AuthGuard` + `@Auths('ADMIN')` (권한)
 - Import alias: `@root/` (maps to `src/`)
+
+## Repository update 패턴
+
+- `repository.update(where, entity)` 호출 시 `new XxxEntity()`로 객체 생성 후 필드 할당하여 전달
+- 이 방식은 `@BeforeUpdate` 훅을 트리거하므로 `update_at` 수동 주입 불필요
+- 잘못된 예: `repository.update({id}, {field1, field2})` — 리터럴 객체는 `@BeforeUpdate` 미트리거
+- 올바른 예:
+  ```typescript
+  const entity = new XxxEntity();
+  entity.field1 = value1;
+  entity.field2 = value2;
+  await repository.update({id}, entity);
+  ```
 
 → 상세: [docs/architecture.md](docs/architecture.md)
 
