@@ -57,13 +57,11 @@ export class VisitRoundListDto extends PaginationDto {
     is_holiday_open?: string;   // 'ALL' | '0' | '1'
     SORT_WEEKDAY?: 'ASC' | 'DESC';
 
-    constructor(data: any) {
+    constructor(data: any = {}) {
         super();
-        if (data) {
-            this.weekday = !isNaN(parseInt(data['weekday'])) ? parseInt(data['weekday']) : 127;
-            this.is_holiday_open = ['ALL', '0', '1'].includes(data['is_holiday_open']) ? data['is_holiday_open'] : 'ALL';
-            this.SORT_WEEKDAY = data['SORT_WEEKDAY'] === 'DESC' ? 'DESC' : 'ASC';
-        }
+        this.weekday = !isNaN(parseInt(data['weekday'])) ? parseInt(data['weekday']) : 127;
+        this.is_holiday_open = ['ALL', '0', '1'].includes(data['is_holiday_open']) ? data['is_holiday_open'] : 'ALL';
+        this.SORT_WEEKDAY = data['SORT_WEEKDAY'] === 'DESC' ? 'DESC' : 'ASC';
     }
 }
 

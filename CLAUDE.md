@@ -46,6 +46,11 @@ src/
 - 서비스 4단계: `totalCount(null)` → `count(dto)` → `Pagination(count)` → list
 - Pagination 객체명은 항상 `pagination`
 
+## Query DTO 생성자 규칙
+
+- 생성자가 있는 Query DTO는 반드시 `constructor(data: any = {})` 형태로 선언
+- `data: any` 로만 선언 시 `class-transformer`(`plainToInstance`)가 인수 없이 호출하여 런타임 에러 발생
+
 → 상세: [docs/repository.md](docs/repository.md)
 
 ## Entity Rules
@@ -96,5 +101,5 @@ src/
 - [ ] FK: `@ManyToOne` + `@JoinColumn({foreignKeyConstraintName})`
 - [ ] Path param: `@Param() param: XxxParamDto`, snake_case 전 레이어 통일
 - [ ] Repository: try/catch, `loadRelationIds: true`, 인라인 조건
-- [ ] Query: `new XxxDto(query)` 인스턴스 생성, `pagination` 객체명 통일
+- [ ] Query: `new XxxDto(query)` 인스턴스 생성, `pagination` 객체명 통일, 생성자는 `constructor(data: any = {})` 형태
 - [ ] Controller 파라미터 한 줄, JSDoc + Swagger 데코레이터 완비

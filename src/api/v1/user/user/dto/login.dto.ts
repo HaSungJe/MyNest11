@@ -26,44 +26,42 @@ export class LoginDto {
     @ApiProperty({description: 'FCM 토큰', required: false})
     fcm_token: string;
 
-    constructor(data: any) {
-        if (data) {
-            // 아이디, 비밀번호
-            this.login_id = data['login_id'] ? data['login_id'] : null;
-            this.login_pw = data['login_pw'] ? data['login_pw'] : null;
+    constructor(data: any = {}) {
+        // 아이디, 비밀번호
+        this.login_id = data['login_id'] ? data['login_id'] : null;
+        this.login_pw = data['login_pw'] ? data['login_pw'] : null;
 
-            // headers로 모바일 정보 얻기
-            this.ip = data['ip'] ? data['ip'] : null;
-            this.agent = data['agent'].toLowerCase();
+        // headers로 모바일 정보 얻기
+        this.ip = data['ip'] ? data['ip'] : null;
+        this.agent = data['agent'].toLowerCase();
 
-            if (data['mobile_yn'] && data['mobile_yn'] === 'Y') {
-                this.device_type = 'M';
-                this.device_os = data['device_os'] ? data['device_os'] : 'android';
-                this.device_id = data['device_id'] ? data['device_id'].replaceAll('-', '') : null;
-                this.fcm_token = data['fcm_token'] ? data['fcm_token'] : null;
-            } else if (this.agent.indexOf('dart') !== -1) {
-                this.device_type = 'M';
-                this.device_os = data['device_os'] ? data['device_os'] : 'android';
-                this.device_id = data['device_id'] ? data['device_id'].replaceAll('-', '') : null;
-                this.fcm_token = data['fcm_token'] ? data['fcm_token'] :  null;
-            } else if (this.agent.indexOf('mobile') !== -1) {
-                this.device_type = 'M';
-    
-                if (this.agent.indexOf('android') !== -1) {
-                    this.device_os = 'android';
-                } else if (this.agent.indexOf("iphone") !== -1 || this.agent.indexOf("ipad") !== -1 || this.agent.indexOf("ipod") !== -1 ) {
-                    this.device_os = 'ios';
-                } else {
-                    this.device_os = 'other';
-                }
+        if (data['mobile_yn'] && data['mobile_yn'] === 'Y') {
+            this.device_type = 'M';
+            this.device_os = data['device_os'] ? data['device_os'] : 'android';
+            this.device_id = data['device_id'] ? data['device_id'].replaceAll('-', '') : null;
+            this.fcm_token = data['fcm_token'] ? data['fcm_token'] : null;
+        } else if (this.agent.indexOf('dart') !== -1) {
+            this.device_type = 'M';
+            this.device_os = data['device_os'] ? data['device_os'] : 'android';
+            this.device_id = data['device_id'] ? data['device_id'].replaceAll('-', '') : null;
+            this.fcm_token = data['fcm_token'] ? data['fcm_token'] :  null;
+        } else if (this.agent.indexOf('mobile') !== -1) {
+            this.device_type = 'M';
 
-                this.device_id = data['device_id'] ? data['device_id'].replaceAll('-', '') : null;
-                this.fcm_token = data['fcm_token'] ? data['fcm_token'] : null;
+            if (this.agent.indexOf('android') !== -1) {
+                this.device_os = 'android';
+            } else if (this.agent.indexOf("iphone") !== -1 || this.agent.indexOf("ipad") !== -1 || this.agent.indexOf("ipod") !== -1 ) {
+                this.device_os = 'ios';
             } else {
-                this.device_type = 'W';
-                this.device_os = null;
-                this.fcm_token = null;
+                this.device_os = 'other';
             }
+
+            this.device_id = data['device_id'] ? data['device_id'].replaceAll('-', '') : null;
+            this.fcm_token = data['fcm_token'] ? data['fcm_token'] : null;
+        } else {
+            this.device_type = 'W';
+            this.device_os = null;
+            this.fcm_token = null;
         }
     }
 }
