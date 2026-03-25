@@ -11,6 +11,48 @@ import dayjs from 'dayjs';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
 
+/**
+ * Swagger 선택박스 js 소스
+ * 
+ * @param selectboxItemText 
+ * @returns 
+ */
+function getSwaggerJs(selectboxItemText: string): string {
+    return `
+        $(document).ready(function() {
+            // 현재 페이지 정보
+            const page = window.location.origin + window.location.pathname;
+
+        // 서버 변경시, 주소 이동
+            $(document).on('change', '#swaggerList', function() {
+                location.href = $(this).val();
+            });
+
+            // 서버목록 해당 페이지 맞는 것으로 선택하기
+            const selectPage = setInterval(() => {
+                const target = $(".schemes-server-container");
+                if (target) {
+                    const html = \`
+                        <div>
+                            <span class="servers-title">Tap</span>
+                            <div class="servers">
+                                <label for="swaggerList">
+                                    <select id="swaggerList">
+                                        ${selectboxItemText}
+                                    </select>  
+                                </label>
+                            </div>
+                        </div>
+                    \`;
+                    target.append(html);
+                    $("#swaggerList").val(page);
+                    clearInterval(selectPage);
+                }
+            }, 100);
+        });
+    `;
+}
+
 async function bootstrap() {
     // 트렌젝션 컨텍스트 초기화
     initializeTransactionalContext();
@@ -28,80 +70,92 @@ async function bootstrap() {
     app.setBaseViewsDir(path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../views' : '../../../views'));
     app.setViewEngine('ejs');
 
-    // API Swagger
-    const reflector = app.get(Reflector);
-    const modules = Reflect.getMetadata('imports', AppModule) || [];
-    const swaggerApiConfigData = new DocumentBuilder();
-    swaggerApiConfigData.setTitle('API Document');
-    swaggerApiConfigData.setVersion(dayjs().format('YYYY-MM-DD HH:mm'));
-    swaggerApiConfigData.addBearerAuth({type: 'http', scheme: 'bearer', bearerFormat: 'JWT', name: 'Authorization', in: 'header'}, 'accessToken');
-    const swaggerApiConfig = swaggerApiConfigData.build();
-
     // API Swagger 링크생성
-    const swagger_path = 'swagger';
+    const isSwaggerTargetSelect: boolean = 'T' === process?.env?.SWAGGER_TARGET_SELECT ? true : false;
+    const swagger_targets: string[] = process?.env?.SWAGGER_TARGET ? process?.env?.SWAGGER_TARGET?.toString()?.split(',') : [];
+    const swagger_path = process.env.SWAGGER_PATH ? process.env.SWAGGER_PATH : 'api-docs';
     const jqueryCDN = `https://code.jquery.com/jquery-3.7.1.slim.js`;
-    let selectBoxHtml = `<option value="/${swagger_path}">전체</option>`;
-    for (let i=0; i<modules.length; i++) {
-        const type = reflector.get<string>('type', modules[i]);
-        if (type && type === 'API') {
-            const path = reflector.get<string>('path', modules[i]);
-            const description = reflector.get<string>('description', modules[i]);
-            selectBoxHtml += `<option value="/${swagger_path}/${path}">${description}</option>`;
-        }
-    }
-    const js = `
-        $(document).ready(function() {
-            // 현재 페이지 정보
-            const page = window.location.origin + window.location.pathname;
-
-            // 서버 변경시, 주소 이동
-            $(document).on('change', '#swaggerList', function() {
-                location.href = $(this).val();
-            });
-
-            // 서버목록 해당 페이지 맞는 것으로 선택하기
-            const selectPage = setInterval(() => {
-                const target = $(".schemes-server-container");
-                if (target) {
-                    const html = \`
-                        <div>
-                            <span class="servers-title">Tap</span>
-                            <div class="servers">
-                                <label for="swaggerList">
-                                    <select id="swaggerList">
-                                        ${selectBoxHtml}
-                                    </select>  
-                                </label>
-                            </div>
-                        </div>
-                    \`;
-                    target.append(html);
-                    $("#swaggerList").val(page);
-                    clearInterval(selectPage);
+    if (isSwaggerTargetSelect) {
+        let selectBoxHtml = ``;
+        for (let i=0; i<modules.length; i++) {
+            const type = reflector.get<string>('type', modules[i]);
+            if (type && type === 'API') {
+                const path = reflector.get<string>('path', modules[i]);
+                if (swagger_targets.includes(path)) {
+                    const description = reflector.get<string>('description', modules[i]);
+                    selectBoxHtml += `<option value="${process.env.SWAGGER_URL}/${swagger_path}/${path}">${description}</option>`;
                 }
-            }, 100);
+            }
+        }
+        const js = getSwaggerJs(selectBoxHtml);
+
+        // Swagger - 개별
+        for (let i=0; i<modules.length; i++) {
+            const type = reflector.get<string>('type', modules[i]);
+            if (type && type === 'API') {
+                const path = reflector.get<string>('path', modules[i]);
+                if (swagger_targets.includes(path)) {
+                    const bearerAuthName: string = path === 'provide' ? 'open-api-key' : 'access-token';
+                    const swaggerApiConfigData = new DocumentBuilder();
+                    swaggerApiConfigData.setTitle('API Document');
+                    swaggerApiConfigData.setVersion(dayjs().format('YYYY-MM-DD HH:mm'));
+                    swaggerApiConfigData.addServer(process.env.SWAGGER_URL);
+                    swaggerApiConfigData.addBearerAuth({type: 'http', scheme: 'bearer', bearerFormat: 'JWT', name: 'Authorization', in: 'header'}, bearerAuthName);
+                    const swaggerApiConfig = swaggerApiConfigData.build();
+                    SwaggerModule.setup(`${swagger_path}/${path}`, app, SwaggerModule.createDocument(app, swaggerApiConfig, {
+                        include: [modules[i]]
+                    }), {
+                        customJs: jqueryCDN,
+                        customJsStr: js
+                    });
+                }
+            }
+        }
+    } else {
+        let selectBoxHtml = `<option value="${process.env.SWAGGER_URL}/${swagger_path}" selected>전체</option>`;
+        for (let i=0; i<modules.length; i++) {
+            const type = reflector.get<string>('type', modules[i]);
+            if (type && type === 'API') {
+                const path = reflector.get<string>('path', modules[i]);
+                const description = reflector.get<string>('description', modules[i]);
+                selectBoxHtml += `<option value="${process.env.SWAGGER_URL}/${swagger_path}/${path}">${description}</option>`;
+            }
+        }
+        const js = getSwaggerJs(selectBoxHtml);
+
+        // Swagger - 전체
+        const swaggerApiConfigData = new DocumentBuilder();
+        swaggerApiConfigData.setTitle('API Document');
+        swaggerApiConfigData.setVersion(dayjs().format('YYYY-MM-DD HH:mm'));
+        swaggerApiConfigData.addServer(process.env.SWAGGER_URL);
+        const swaggerApiConfig = swaggerApiConfigData.build();
+        SwaggerModule.setup(swagger_path, app, SwaggerModule.createDocument(app, swaggerApiConfig, {
+            include: [],
+        }), {
+            customJs: jqueryCDN,
+            customJsStr: js
         });
-    `;
 
-    // Swagger - 전체
-    SwaggerModule.setup(swagger_path, app, SwaggerModule.createDocument(app, swaggerApiConfig, {
-        include: [],
-    }), {
-        customJs: jqueryCDN,
-        customJsStr: js
-    });
+        // Swagger - 개별
+        for (let i=0; i<modules.length; i++) {
+            const type = reflector.get<string>('type', modules[i]);
+            if (type && type === 'API') {
+                const path = reflector.get<string>('path', modules[i]);
+                const bearerAuthName: string = path === 'provide' ? 'open-api-key' : 'access-token';
+                const swaggerApiConfigData = new DocumentBuilder();
+                swaggerApiConfigData.setTitle('API Document');
+                swaggerApiConfigData.setVersion(dayjs().format('YYYY-MM-DD HH:mm'));
+                swaggerApiConfigData.addServer(process.env.SWAGGER_URL);
+                swaggerApiConfigData.addBearerAuth({type: 'http', scheme: 'bearer', bearerFormat: 'JWT', name: 'Authorization', in: 'header'}, bearerAuthName);
+                const swaggerApiConfig = swaggerApiConfigData.build();
 
-    // Swagger - 개별
-    for (let i=0; i<modules.length; i++) {
-        const type = reflector.get<string>('type', modules[i]);
-        if (type && type === 'API') {
-            const path = reflector.get<string>('path', modules[i]);
-            SwaggerModule.setup(`${swagger_path}/${path}`, app, SwaggerModule.createDocument(app, swaggerApiConfig, {
-                include: [modules[i]]
-            }), {
-                customJs: jqueryCDN,
-                customJsStr: js
-            });
+                SwaggerModule.setup(`${swagger_path}/${path}`, app, SwaggerModule.createDocument(app, swaggerApiConfig, {
+                    include: [modules[i]]
+                }), {
+                    customJs: jqueryCDN,
+                    customJsStr: js
+                });
+            }
         }
     }
 
