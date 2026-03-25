@@ -70,6 +70,10 @@ async function bootstrap() {
     app.setBaseViewsDir(path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../views' : '../../../views'));
     app.setViewEngine('ejs');
 
+    // API Swagger
+    const reflector = app.get(Reflector);
+    const modules = Reflect.getMetadata('imports', AppModule) || [];
+
     // API Swagger 링크생성
     const isSwaggerTargetSelect: boolean = 'T' === process?.env?.SWAGGER_TARGET_SELECT ? true : false;
     const swagger_targets: string[] = process?.env?.SWAGGER_TARGET ? process?.env?.SWAGGER_TARGET?.toString()?.split(',') : [];
@@ -95,7 +99,7 @@ async function bootstrap() {
             if (type && type === 'API') {
                 const path = reflector.get<string>('path', modules[i]);
                 if (swagger_targets.includes(path)) {
-                    const bearerAuthName: string = path === 'provide' ? 'open-api-key' : 'access-token';
+                    const bearerAuthName: string = 'access-token';
                     const swaggerApiConfigData = new DocumentBuilder();
                     swaggerApiConfigData.setTitle('API Document');
                     swaggerApiConfigData.setVersion(dayjs().format('YYYY-MM-DD HH:mm'));
@@ -141,7 +145,7 @@ async function bootstrap() {
             const type = reflector.get<string>('type', modules[i]);
             if (type && type === 'API') {
                 const path = reflector.get<string>('path', modules[i]);
-                const bearerAuthName: string = path === 'provide' ? 'open-api-key' : 'access-token';
+                const bearerAuthName: string = 'access-token';
                 const swaggerApiConfigData = new DocumentBuilder();
                 swaggerApiConfigData.setTitle('API Document');
                 swaggerApiConfigData.setVersion(dayjs().format('YYYY-MM-DD HH:mm'));
